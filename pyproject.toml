@@ -4,12 +4,24 @@ build-backend = "maturin"
 
 [project]
 name = "zeroize"
-requires-python = ">=3.8"
+authors = [
+    { name="Radu Marias", email="radumarias@gmail.com" },
+]
+description = "Securely clear secrets from memory built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler. Uses a portable pure Rust implementation that works everywhere."
+readme = "README.md"
+keywords = ["memory", "volatile", "secure", "memset", "zero"]
+
+requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
+    "License :: OSI Approved :: Apache Software License",
 ]
 dynamic = ["version"]
 [tool.maturin]
 features = ["pyo3/extension-module"]
+
+[project.urls]
+Homepage = "https://github.com/radumarias/zeroize-python"
+Issues = "https://github.com/radumarias/zeroize-python/issues"
