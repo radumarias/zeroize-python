@@ -12,7 +12,7 @@ It can work with `bytearray` and `numpy array`.
 
 > ⚠️ **Warning**  
 > **Currently it doens't work in the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write)  
-> Also by itself it doesn't work if memory is moved or moved to swap file. You can use `crypes` with `libc.mlockall` to lock the memory, see example below.***
+> Also by itself it doesn't work if memory is moved or moved to swap file. You can use `crypes` with `libc.mlockall()` to lock the memory, see example below.***
 
 # Example
 
