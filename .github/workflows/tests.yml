@@ -19,15 +19,10 @@ jobs:
     - name: Check out repository code
       uses: actions/checkout@v4          
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
-    - uses: PyO3/maturin-action@v1
-      with:
-        command: develop
-        args: --release
-    
     - name: Build wheels
       uses: PyO3/maturin-action@v1
       with:
@@ -39,7 +34,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: wheels-linux-${{ matrix.platform.target }}
-        path: dist    
+        path: dist
     
     - name: Install dependencies
       run: |
