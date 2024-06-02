@@ -17,17 +17,8 @@ jobs:
 
     steps:
     - name: Check out repository code
-      uses: actions/checkout@v4
-    - name: Build
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-    - name: Build wheels
-      uses: PyO3/maturin-action@v1
-      with:
-        target: ${{ matrix.platform.target }}
-        args: --release --out dist --find-interpreter
-        sccache: 'true'
+      uses: actions/checkout@v2
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
