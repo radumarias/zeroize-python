@@ -10,6 +10,10 @@ Uses a portable pure Rust implementation that works everywhere.
 It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood.  
 It can work with `bytearray` and numpy array.
 
+> ⚠️ **Warning**  
+> **Currently it doens't work in the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write)  
+> Also it doesn't work if memory is moved or moved to swap file. You can use `crypes` with `libc.mlockall` to lock the memory from being swapped, see example below.***
+
 # Example
 
 ```python
@@ -35,6 +39,40 @@ assert all(arr_np == 0)
 
 print("all good, bye!")
 ```
+
+# Use `crypes` with `libc.mlockall()` to lock the memory from being swapped
+
+```python
+import ctypes
+
+MCL_CURRENT = 1
+MCL_FUTURE  = 2
+
+libc = ctypes.CDLL('libc.so.6', use_errno=True)
+
+def mlockall(flags=MCL_CURRENT|MCL_FUTURE):
+    result = libc.mlockall(flags)
+    if result != 0:
+        raise Exception("cannot lock memmory, errno=%s" % ctypes.get_errno())
+
+def munlockall():
+    result = libc.munlockall()
+    if result != 0:
+        raise Exception("cannot lock memmory, errno=%s" % ctypes.get_errno())
+
+
+if __name__ == '__main__':
+    mlockall()
+    print("memmory locked")
+
+    # allocate your data here
+    # ...
+    # zeroize it
+
+    munlockall()
+    print("memmory unlocked")
+```
+
 # Building from source
 
 ## Browser
