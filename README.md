@@ -40,7 +40,7 @@ assert all(arr_np == 0)
 print("all good, bye!")
 ```
 
-# Use `crypes` with `libc.mlockall` to lock the memory from being swapped
+# Use `crypes` with `libc.mlockall()` to lock the memory from being swapped
 
 ```python
 import ctypes
