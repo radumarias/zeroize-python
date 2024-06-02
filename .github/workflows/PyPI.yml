@@ -23,20 +23,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger target workflow
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { owner, repo } = context.repo;
-            const workflow_id = 'tests.yml';  // or use the workflow ID if known
-            const ref = 'main';  // the branch you want to run the workflow on
-
-            await github.actions.createWorkflowDispatch({
-              owner,
-              repo,
-              workflow_id,
-              ref,
-            });
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/tests.yml/dispatches \
+            -d '{"ref":"main"}'
+            
   linux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
@@ -144,7 +139,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [linux, windows, macos, sdist]
+    needs: [tests, linux, windows, macos, sdist]
     steps:
       - uses: actions/download-artifact@v4
       - name: Publish to PyPI
