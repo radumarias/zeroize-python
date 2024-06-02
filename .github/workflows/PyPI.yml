@@ -19,6 +19,24 @@ permissions:
   contents: read
 
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger target workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const workflow_id = 'tests.yml';  // or use the workflow ID if known
+            const ref = 'main';  // the branch you want to run the workflow on
+
+            await github.actions.createWorkflowDispatch({
+              owner,
+              repo,
+              workflow_id,
+              ref,
+            });
   linux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
