@@ -23,6 +23,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: venv      
+      run: |
+        python python -m venv .env
+        source .env/bin/activate
+        pip instal maturin
+        
     - uses: PyO3/maturin-action@v1
       with:
         command: develop
