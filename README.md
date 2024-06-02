@@ -8,7 +8,7 @@ Securely clear secrets from memory. Built on stable Rust primitives which guaran
 Uses a portable pure Rust implementation that works everywhere.
 
 It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood.  
-It can work with `bytearray` and numpy array.
+It can work with `bytearray` and `numpy array`.
 
 > ⚠️ **Warning**  
 > **Currently it doens't work in the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write)  
