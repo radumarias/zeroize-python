@@ -23,6 +23,11 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - uses: PyO3/maturin-action@v1
+      with:
+        command: develop
+        args: --release
+    
     - name: Build wheels
       uses: PyO3/maturin-action@v1
       with:
@@ -30,11 +35,6 @@ jobs:
         args: --release --out dist --find-interpreter
         sccache: 'true'
         manylinux: auto
-    - name: Upload wheels
-      uses: actions/upload-artifact@v4
-      with:
-        name: wheels-linux-${{ matrix.platform.target }}
-        path: dist
     
     - name: Install dependencies
       run: |
