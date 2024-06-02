@@ -9,10 +9,21 @@ It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood.
 
 ```python
 import zeroize
+import numpy as np
 
+
+# regular array
 arr = bytearray(b'1234567890')
+# numpy array
+arr_np = np.array([0] * 10, dtype=np.uint8)
+arr_np[:] = arr
+assert arr_np.tobytes() == b'1234567890'
 zeroize.zeroize1(arr)
+zeroize.zeroize_np(arr_np)
+print("zeroize'ing...: ")
+print("checking if is zeroized...")
 assert arr == bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+assert all(arr_np == 0)
 print("all good, bye!")
 ```
 # Building from source
@@ -45,6 +56,7 @@ This is usually done by running one of the following (note the leading DOT):
 python -m venv .env
 source .env/bin/activate
 pip install maturin
+pip install numpy
 maturin develop
 python main.py
 ```
