@@ -15,6 +15,7 @@ import numpy as np
 
 # regular array
 arr = bytearray(b'1234567890')
+
 # numpy array
 arr_np = np.array([0] * 10, dtype=np.uint8)
 arr_np[:] = arr
