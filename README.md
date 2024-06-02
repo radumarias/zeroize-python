@@ -11,7 +11,7 @@ It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood.
 It can work with `bytearray` and `numpy array`.
 
 > ⚠️ **Warning**  
-> **Currently it doens't work in the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write)  
+> **Currently it doens't work in the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write), you can follow this [issue](https://github.com/radumarias/zeroize-python/issues/1)  
 > Also by itself it doesn't work if memory is moved or moved to swap file. You can use `crypes` with `libc.mlockall()` to lock the memory, see example below.***
 
 # Example
