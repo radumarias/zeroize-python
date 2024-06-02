@@ -1,5 +1,7 @@
 # Zeroize
 
+[![CI](https://github.com/radumarias/zeroize-python/actions/workflows/CI.yml/badge.svg)](https://github.com/radumarias/zeroize-python/actions/workflows/CI.yml)
+
 Securely clear secrets from memory. Built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler.
 Uses a portable pure Rust implementation that works everywhere.
 
