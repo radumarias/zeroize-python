@@ -1,8 +1,8 @@
 # Zeroize
 
-[![PyPI version](https://badge.fury.io/py/rencrypt.svg)](https://badge.fury.io/py/rencrypt)
+[![PyPI version](https://badge.fury.io/py/zeroize.svg)](https://badge.fury.io/py/zeroize)
 [![PyPI](https://github.com/radumarias/zeroize-python/actions/workflows/PyPI.yml/badge.svg)](https://github.com/radumarias/zeroize-python/actions/workflows/PyPI.yml)
-[![tests](https://github.com/radumarias/zeroize-python/actions/workflows/tests.yml/badge.svg)](https://github.com/radumarias/zeroize-python/actions/workflows/tests.yml)
+[![tests](https://github.com/radumarias/zeroize-python/actions/workflows/tests.yml/badge.svg)](https://github.com/radumarias/zeroize-python/actions/workflows/tests.yml)  
 
 Clear secrets from memory. Built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler.
 Uses a portable pure Rust implementation that works everywhere.
@@ -10,9 +10,9 @@ Uses a portable pure Rust implementation that works everywhere.
 It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood.  
 It can work with `bytearray` and `numpy array`.
 
-> ⚠️ **Warning**  
+> [!WARNING]
 > **Currently it doens't work in the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write), you can follow this [issue](https://github.com/radumarias/zeroize-python/issues/1)  
-> Also by itself it doesn't work if memory is moved or moved to swap file. You can use `crypes` with `libc.mlockall()` to lock the memory, see example below.***
+> Also by itself it doesn't work if memory is moved or moved to swap file. You can use `crypes` with `libc.mlockall()` to lock the memory, see example below.**
 
 # Example
 
