@@ -11,55 +11,134 @@ It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood.
 It can work with `bytearray` and `numpy array`.
 
 > [!WARNING]
-> **Currently it doens't work in the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write), you can follow this [issue](https://github.com/radumarias/zeroize-python/issues/1)  
-> Also by itself it doesn't work if memory is moved or moved to swap file. You can use `crypes` with `libc.mlockall()` to lock the memory, see example below.**
+> **In the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write) you should zeroize the memory before fork the child process, see example below.  
+> Also by itself it doesn't work if memory is moved or moved to swap file. You can use `crypes` with `libc.mlock()` to lock the memory, see example below.**
 
-# Example
+# Examples
+
+## Lock and zeroize memory
 
 ```python
-import zeroize
+from zeroize import zeroize1, zeroize_np
 import numpy as np
 import ctypes
 
 
-# Lock memory using ctypes
-def lock_memory():
-    libc = ctypes.CDLL("libc.so.6")
-    # Lock all current and future pages from being swapped out
-    libc.mlockall(ctypes.c_int(0x02 | 0x04))  # MCL_CURRENT | MCL_FUTURE
+# Load the C standard library
+LIBC = ctypes.CDLL("libc.so.6")
+MLOCK = LIBC.mlock
+MUNLOCK = LIBC.munlock
+
+# Define mlock and munlock argument types
+MLOCK.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+MUNLOCK.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
 
 
-def unlock_memory():
-    libc = ctypes.CDLL("libc.so.6")
-    # Unlock all locked pages
-    libc.munlockall()
+def lock_memory(buffer):
+    """Locks the memory of the given buffer."""
+    address = ctypes.addressof(ctypes.c_char.from_buffer(buffer))
+    size = len(buffer)
+    if MLOCK(address, size) != 0:
+        raise RuntimeError("Failed to lock memory")
 
 
-print("locking memory")
-lock_memory()
+def unlock_memory(buffer):
+    """Unlocks the memory of the given buffer."""
+    address = ctypes.addressof(ctypes.c_char.from_buffer(buffer))
+    size = len(buffer)
+    if MUNLOCK(address, size) != 0:
+        raise RuntimeError("Failed to unlock memory")
 
-print("allocate memory")
 
-# regular array
-arr = bytearray(b"1234567890")
+try:
+    print("allocate memory")
 
-# numpy array
-arr_np = np.array([0] * 10, dtype=np.uint8)
-arr_np[:] = arr
-assert arr_np.tobytes() == b"1234567890"
+    # regular array
+    arr = bytearray(b"1234567890")
 
-print("zeroize'ing...: ")
-zeroize.zeroize1(arr)
-zeroize.zeroize_np(arr_np)
+    # numpy array
+    arr_np = np.array([0] * 10, dtype=np.uint8)
+    arr_np[:] = arr
+    assert arr_np.tobytes() == b"1234567890"
 
-print("checking if is zeroized")
-assert arr == bytearray(b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
-assert all(arr_np == 0)
+    print("locking memory")
 
-print("unlocking memory")
-unlock_memory()
+    lock_memory(arr)
+    lock_memory(arr_np)
 
-print("all good, bye!")
+    print("zeroize'ing...: ")
+    zeroize1(arr)
+    zeroize_np(arr_np)
+
+    print("checking if is zeroized")
+    assert arr == bytearray(b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
+    assert all(arr_np == 0)
+
+    print("all good, bye!")
+finally:
+    # Unlock the memory
+    print("unlocking memory")
+    unlock_memory(arr)
+    unlock_memory(arr_np)
+```
+
+## Zeroing memory before starting child process
+
+This mitigates the problems that appears on [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write). You need to zeroize the data before forking the child process.
+```python
+import os
+from zeroize import zeroize1, zeroize_np
+import numpy as np
+import ctypes
+
+
+# Load the C standard library
+LIBC = ctypes.CDLL("libc.so.6")
+MLOCK = LIBC.mlock
+MUNLOCK = LIBC.munlock
+
+# Define mlock and munlock argument types
+MLOCK.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+MUNLOCK.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+
+
+def lock_memory(buffer):
+    """Locks the memory of the given buffer."""
+    address = ctypes.addressof(ctypes.c_char.from_buffer(buffer))
+    size = len(buffer)
+    if MLOCK(address, size) != 0:
+        raise RuntimeError("Failed to lock memory")
+
+
+def unlock_memory(buffer):
+    """Unlocks the memory of the given buffer."""
+    address = ctypes.addressof(ctypes.c_char.from_buffer(buffer))
+    size = len(buffer)
+    if MUNLOCK(address, size) != 0:
+        raise RuntimeError("Failed to unlock memory")
+
+
+try:
+    sensitive_data = bytearray(b"Sensitive Information")
+    lock_memory(sensitive_data)
+
+    print("Before zeroization:", sensitive_data)
+
+    zeroize1(sensitive_data)
+    print("After zeroization:", sensitive_data)
+
+    # Forking after zeroization to ensure no sensitive data is copied
+    pid = os.fork()
+    if pid == 0:
+        # This is the child process
+        print("Child process memory after fork:", sensitive_data)
+    else:
+        # This is the parent process
+        os.wait()  # Wait for the child process to exit
+finally:
+    # Unlock the memory
+    print("unlocking memory")
+    unlock_memory(sensitive_data)
 ```
 
 # Building from source
@@ -94,5 +173,6 @@ source .env/bin/activate
 pip install maturin
 pip install numpy
 maturin develop
-python main.py
+python examples/lock_and_zeroize.py
+python examples/zeroize_before_fork.py
 ```
