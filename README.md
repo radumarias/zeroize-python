@@ -2,7 +2,8 @@
 
 [![PyPI version](https://badge.fury.io/py/zeroize.svg)](https://badge.fury.io/py/zeroize)
 [![PyPI](https://github.com/radumarias/zeroize-python/actions/workflows/PyPI.yml/badge.svg)](https://github.com/radumarias/zeroize-python/actions/workflows/PyPI.yml)
-[![tests](https://github.com/radumarias/zeroize-python/actions/workflows/tests.yml/badge.svg)](https://github.com/radumarias/zeroize-python/actions/workflows/tests.yml)
+[![tests](https://github.com/radumarias/zeroize-python/actions/workflows/tests.yml/badge.svg)](https://github.com/radumarias/zeroize-python/actions/workflows/tests.yml)  
+<a href="https://www.buymeacoffee.com/xorio42"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=xorio42&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
 
 Clear secrets from memory. Built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler.
 Uses a portable pure Rust implementation that works everywhere.
