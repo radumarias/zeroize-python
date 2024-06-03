@@ -1,6 +1,7 @@
+""" In the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write) you need to zeroize the memory before forking the child process. """
+
 import os
-from zeroize import zeroize1, zeroize_np
-import numpy as np
+from zeroize import zeroize1
 import ctypes
 
 
@@ -51,4 +52,3 @@ finally:
     # Unlock the memory
     print("unlocking memory")
     unlock_memory(sensitive_data)
-    
