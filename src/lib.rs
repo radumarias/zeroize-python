@@ -1,4 +1,6 @@
+use std::any::Any;
 use std::mem;
+use std::ops::Deref;
 use std::sync::Once;
 
 use libc::{self, size_t};
@@ -9,7 +11,8 @@ use libsodium_sys::{
 };
 use numpy::{PyArray1, PyArrayMethods};
 use pyo3::prelude::*;
-use pyo3::types::{PyByteArray, PyCFunction};
+use pyo3::pybacked::PyBackedBytes;
+use pyo3::types::{PyByteArray, PyBytes, PyCFunction};
 use zeroize_rs::Zeroize;
 
 /// The global [`sync::Once`] that ensures we only perform
@@ -33,7 +36,7 @@ fn zeroize<'py>(_py: Python, m: &Bound<'py, PyModule>) -> PyResult<()> {
 
 #[pyfunction]
 fn zeroize1<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
-    as_array(arr)?.zeroize();
+    as_array_mut(arr)?.zeroize();
     Ok(())
 }
 
@@ -45,7 +48,7 @@ fn mlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
         ));
     }
     unsafe {
-        if !_mlock(as_array(arr)?.as_mut_ptr()) {
+        if !_mlock(as_array_mut(arr)?.as_mut_ptr()) {
             return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
                 "mlock failed",
             ));
@@ -62,7 +65,7 @@ fn munlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
         ));
     }
     unsafe {
-        if !_munlock(as_array(arr)?.as_mut_ptr()) {
+        if !_munlock(as_array_mut(arr)?.as_mut_ptr()) {
             return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
                 "mlock failed",
             ));
@@ -71,12 +74,29 @@ fn munlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
     Ok(())
 }
 
-fn as_array<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a mut [u8]> {
+fn as_array_mut<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a mut [u8]> {
     let arr = unsafe {
         if let Ok(arr) = arr.downcast::<PyByteArray>() {
             arr.as_bytes_mut()
         } else if let Ok(arr) = arr.downcast::<PyArray1<u8>>() {
             arr.as_slice_mut().unwrap()
+        } else {
+            return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+                "Expected a PyByteArray or PyArray1<u8>",
+            ));
+        }
+    };
+    Ok(arr)
+}
+
+fn as_array<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a [u8]> {
+    let arr = unsafe {
+        if let Ok(arr) = arr.downcast::<PyByteArray>() {
+            arr.as_bytes()
+        } else if let Ok(arr) = arr.downcast::<PyBytes>() {
+            arr.as_bytes()
+        } else if let Ok(arr) = arr.downcast::<PyArray1<u8>>() {
+            arr.as_slice().unwrap()
         } else {
             return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
                 "Expected a PyByteArray or PyArray1<u8>",
