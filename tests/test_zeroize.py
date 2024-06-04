@@ -2,10 +2,20 @@ import unittest
 import zeroize
 import numpy as np
 import ctypes
+import platform
 
+
+os_name = platform.system()
 
 # Load the C standard library
-LIBC = ctypes.CDLL("libc.so.6")
+if os_name == "Linux":
+    LIBC = ctypes.CDLL("libc.so.6")
+elif os_name == "Darwin":
+    LIBC = ctypes.CDLL("libc.dylib")
+elif os_name == "Windows":
+    LIBC = ctypes.CDLL("msvcrt.dll")
+else:
+    raise RuntimeError(f"Unsupported OS: {os_name}")
 MLOCK = LIBC.mlock
 MUNLOCK = LIBC.munlock
 
