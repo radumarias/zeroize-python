@@ -74,7 +74,18 @@ jobs:
         .env\Scripts\activate
         pip install -r requirements.txt        
         maturin develop --release
-        maturin build --release
+    - name: Build wheels
+      uses: PyO3/maturin-action@v1
+      with:
+        target: x64
+        args: --release --out dist --find-interpreter
+        sccache: 'true'
+    - name: Build wheels
+      uses: PyO3/maturin-action@v1
+      with:
+        target: x86
+        args: --release --out dist --find-interpreter
+        sccache: 'true'
     - name: Run tests
       run: |
         .env\Scripts\activate
