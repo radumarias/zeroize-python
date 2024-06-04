@@ -48,8 +48,8 @@ def lock_memory(buffer):
         if MLOCK(address, size) != 0:
             raise RuntimeError("Failed to lock memory")
     elif os_name == "Windows":
-        if VirtualLock(address, size) == 0:
-            raise RuntimeError("Failed to lock memory")
+        if VirtualLock(ctypes.addressof(buffer), ctypes.sizeof(buffer)) == 0:
+            raise RuntimeError("VirtualLock failed")
     else:
         raise RuntimeError(f"Unsupported OS: {os_name}")
 
@@ -62,8 +62,8 @@ def unlock_memory(buffer):
         if MUNLOCK(address, size) != 0:
             raise RuntimeError("Failed to unlock memory")
     elif os_name == "Windows":
-        if VirtualUnlock(address, size) == 0:
-            raise RuntimeError("Failed to unlock memory")
+        if VirtualUnlock(ctypes.addressof(buffer), ctypes.sizeof(buffer)) == 0:
+            raise RuntimeError("VirtualUnlock failed")
     else:
         raise RuntimeError(f"Unsupported OS: {os_name}")
 
