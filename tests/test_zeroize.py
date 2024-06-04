@@ -14,8 +14,37 @@ elif os_name == "Darwin":
     # Load the C standard library
     LIBC = ctypes.CDLL("libc.dylib")
 elif os_name == "Windows":
-    # Load the kernel32 library
+    # Define structures and constants
+    class SYSTEM_INFO(ctypes.Structure):
+        _fields_ = [("wProcessorArchitecture", ctypes.c_uint16),
+                    ("wReserved", ctypes.c_uint16),
+                    ("dwPageSize", ctypes.c_uint32),
+                    ("lpMinimumApplicationAddress", ctypes.c_void_p),
+                    ("lpMaximumApplicationAddress", ctypes.c_void_p),
+                    ("dwActiveProcessorMask", ctypes.c_void_p),
+                    ("dwNumberOfProcessors", ctypes.c_uint32),
+                    ("dwProcessorType", ctypes.c_uint32),
+                    ("dwAllocationGranularity", ctypes.c_uint32),
+                    ("wProcessorLevel", ctypes.c_uint16),
+                    ("wProcessorRevision", ctypes.c_uint16)]
+
+    # Load necessary libraries
     kernel32 = ctypes.windll.kernel32
+    ntdll = ctypes.windll.ntdll
+
+    # Define NtLockVirtualMemory and NtUnlockVirtualMemory
+    NtLockVirtualMemory = ntdll.NtLockVirtualMemory
+    NtUnlockVirtualMemory = ntdll.NtUnlockVirtualMemory
+
+    # Define constants
+    PAGE_READWRITE = 0x04
+    MEM_COMMIT = 0x1000
+    MEM_RESERVE = 0x2000
+
+    # Get system information
+    system_info = SYSTEM_INFO()
+    kernel32.GetSystemInfo(ctypes.byref(system_info))
+    page_size = system_info.dwPageSize
 else:
     raise RuntimeError(f"Unsupported OS: {os_name}")
 
@@ -27,17 +56,6 @@ if os_name == "Linux" or os_name == "Darwin":
     # Define mlock and munlock argument types
     MLOCK.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
     MUNLOCK.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
-elif os_name == "Windows":
-    # Define the VirtualLock and VirtualUnlock functions
-    VirtualLock = kernel32.VirtualLock
-    VirtualLock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
-    VirtualLock.restype = ctypes.c_int
-
-    VirtualUnlock = kernel32.VirtualUnlock
-    VirtualUnlock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
-    VirtualUnlock.restype = ctypes.c_int
-else:
-    raise RuntimeError(f"Unsupported OS: {os_name}")
 
 
 def lock_memory(buf):
@@ -49,9 +67,13 @@ def lock_memory(buf):
             raise RuntimeError("Failed to lock memory")
     elif os_name == "Windows":
         buf_ptr = ctypes.c_void_p(ctypes.addressof(ctypes.c_char.from_buffer(buf)))
-        size = ctypes.sizeof(ctypes.c_char) * len(buf)
-        if VirtualLock(buf_ptr, size) == 0:
-            raise RuntimeError("VirtualLock failed")
+        size = ctypes.c_size_t(len(buf))
+        region_size = ctypes.c_size_t(size.value)
+        status = NtLockVirtualMemory(
+            ctypes.windll.kernel32.GetCurrentProcess(), ctypes.byref(buf_ptr), ctypes.byref(region_size), 0
+        )
+        if status != 0:
+            raise RuntimeError(f"NtLockVirtualMemory failed with status code: {status}")
     else:
         raise RuntimeError(f"Unsupported OS: {os_name}")
 
@@ -65,9 +87,13 @@ def unlock_memory(buf):
             raise RuntimeError("Failed to unlock memory")
     elif os_name == "Windows":
         buf_ptr = ctypes.c_void_p(ctypes.addressof(ctypes.c_char.from_buffer(buf)))
-        size = ctypes.sizeof(ctypes.c_char) * len(buf)
-        if VirtualUnlock(buf_ptr, size) == 0:
-            raise RuntimeError("VirtualUnlock failed")
+        size = ctypes.c_size_t(len(buf))
+        region_size = ctypes.c_size_t(size.value)
+        status = NtUnlockVirtualMemory(
+            ctypes.windll.kernel32.GetCurrentProcess(), ctypes.byref(buf_ptr), ctypes.byref(region_size), 0
+        )
+        if status != 0:
+            raise RuntimeError(f"NtUnlockVirtualMemory failed with status code: {status}")
     else:
         raise RuntimeError(f"Unsupported OS: {os_name}")
 
