@@ -22,7 +22,7 @@ static mut INITIALIZED: bool = false;
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn zeroize<'py>(py: Python, m: &Bound<'py, PyModule>) -> PyResult<()> {
+fn zeroize<'py>(_py: Python, m: &Bound<'py, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(zeroize1, m)?)?;
     m.add_function(wrap_pyfunction!(zeroize_np, m)?)?;
     // m.add_function(wrap_pyfunction!(zeroize_mv, m)?)?;
