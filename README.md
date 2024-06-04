@@ -170,8 +170,7 @@ This is usually done by running one of the following (note the leading DOT):
 ```
 python -m venv .env
 source .env/bin/activate
-pip install maturin
-pip install numpy
+pip install -r requirements.txt
 maturin develop
 python examples/lock_and_zeroize.py
 python examples/zeroize_before_fork.py
