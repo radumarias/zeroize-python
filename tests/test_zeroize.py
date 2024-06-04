@@ -14,20 +14,6 @@ elif os_name == "Darwin":
     # Load the C standard library
     LIBC = ctypes.CDLL("libc.dylib")
 elif os_name == "Windows":
-    # Define structures and constants
-    class SYSTEM_INFO(ctypes.Structure):
-        _fields_ = [("wProcessorArchitecture", ctypes.c_uint16),
-                    ("wReserved", ctypes.c_uint16),
-                    ("dwPageSize", ctypes.c_uint32),
-                    ("lpMinimumApplicationAddress", ctypes.c_void_p),
-                    ("lpMaximumApplicationAddress", ctypes.c_void_p),
-                    ("dwActiveProcessorMask", ctypes.c_void_p),
-                    ("dwNumberOfProcessors", ctypes.c_uint32),
-                    ("dwProcessorType", ctypes.c_uint32),
-                    ("dwAllocationGranularity", ctypes.c_uint32),
-                    ("wProcessorLevel", ctypes.c_uint16),
-                    ("wProcessorRevision", ctypes.c_uint16)]
-
     # Load necessary libraries
     kernel32 = ctypes.windll.kernel32
     ntdll = ctypes.windll.ntdll
@@ -35,16 +21,6 @@ elif os_name == "Windows":
     # Define NtLockVirtualMemory and NtUnlockVirtualMemory
     NtLockVirtualMemory = ntdll.NtLockVirtualMemory
     NtUnlockVirtualMemory = ntdll.NtUnlockVirtualMemory
-
-    # Define constants
-    PAGE_READWRITE = 0x04
-    MEM_COMMIT = 0x1000
-    MEM_RESERVE = 0x2000
-
-    # Get system information
-    system_info = SYSTEM_INFO()
-    kernel32.GetSystemInfo(ctypes.byref(system_info))
-    page_size = system_info.dwPageSize
 else:
     raise RuntimeError(f"Unsupported OS: {os_name}")
 
