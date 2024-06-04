@@ -12,3 +12,5 @@ crate-type = ["cdylib"]
 pyo3 = "0.21.2"
 zeroize_rs = { version = "1.8.1", package = "zeroize"}
 numpy = "0.21"
+libsodium-sys = "0.2.7"
+libc = "0.2.155"
