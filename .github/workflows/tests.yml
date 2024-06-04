@@ -53,7 +53,7 @@ jobs:
     - name: Run tests
       run: |
         source .env/bin/activate
-        pytest
+        ./tests.bat
 
   test_windows:
     runs-on: windows-latest
@@ -77,4 +77,4 @@ jobs:
     - name: Run tests
       run: |
         .env\Scripts\activate
-        pytest
+        tests.bat
