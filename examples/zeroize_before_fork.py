@@ -31,24 +31,26 @@ def unlock_memory(buffer):
         raise RuntimeError("Failed to unlock memory")
 
 
-try:
-    sensitive_data = bytearray(b"Sensitive Information")
-    lock_memory(sensitive_data)
+if __name__ == "__main__":
+    try:
+        sensitive_data = bytearray(b"Sensitive Information")
+        lock_memory(sensitive_data)
 
-    print("Before zeroization:", sensitive_data)
+        print("Before zeroization:", sensitive_data)
 
-    zeroize1(sensitive_data)
-    print("After zeroization:", sensitive_data)
+        zeroize1(sensitive_data)
+        print("After zeroization:", sensitive_data)
 
-    # Forking after zeroization to ensure no sensitive data is copied
-    pid = os.fork()
-    if pid == 0:
-        # This is the child process
-        print("Child process memory after fork:", sensitive_data)
-    else:
-        # This is the parent process
-        os.wait()  # Wait for the child process to exit
-finally:
-    # Unlock the memory
-    print("unlocking memory")
-    unlock_memory(sensitive_data)
+        # Forking after zeroization to ensure no sensitive data is copied
+        pid = os.fork()
+        if pid == 0:
+            # This is the child process
+            print("Child process memory after fork:", sensitive_data)
+        else:
+            # This is the parent process
+            os.wait()  # Wait for the child process to exit
+            
+    finally:
+        # Unlock the memory
+        print("unlocking memory")
+        unlock_memory(sensitive_data)

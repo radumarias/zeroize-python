@@ -30,34 +30,35 @@ def unlock_memory(buffer):
     if MUNLOCK(address, size) != 0:
         raise RuntimeError("Failed to unlock memory")
 
+if __name__ == "__main__":
+    try:
+        print("allocate memory")
 
-try:
-    print("allocate memory")
+        # regular array
+        arr = bytearray(b"1234567890")
 
-    # regular array
-    arr = bytearray(b"1234567890")
+        # numpy array
+        arr_np = np.array([0] * 10, dtype=np.uint8)
+        arr_np[:] = arr
+        assert arr_np.tobytes() == b"1234567890"
 
-    # numpy array
-    arr_np = np.array([0] * 10, dtype=np.uint8)
-    arr_np[:] = arr
-    assert arr_np.tobytes() == b"1234567890"
+        print("locking memory")
 
-    print("locking memory")
+        lock_memory(arr)
+        lock_memory(arr_np)
 
-    lock_memory(arr)
-    lock_memory(arr_np)
+        print("zeroize'ing...: ")
+        zeroize1(arr)
+        zeroize_np(arr_np)
 
-    print("zeroize'ing...: ")
-    zeroize1(arr)
-    zeroize_np(arr_np)
+        print("checking if is zeroized")
+        assert arr == bytearray(b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
+        assert all(arr_np == 0)
 
-    print("checking if is zeroized")
-    assert arr == bytearray(b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
-    assert all(arr_np == 0)
-
-    print("all good, bye!")
-finally:
-    # Unlock the memory
-    print("unlocking memory")
-    unlock_memory(arr)
-    unlock_memory(arr_np)
+        print("all good, bye!")
+        
+    finally:
+        # Unlock the memory
+        print("unlocking memory")
+        unlock_memory(arr)
+        unlock_memory(arr_np)
