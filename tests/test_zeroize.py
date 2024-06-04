@@ -40,29 +40,33 @@ else:
     raise RuntimeError(f"Unsupported OS: {os_name}")
 
 
-def lock_memory(buffer):
+def lock_memory(buf):
     """Locks the memory of the given buffer."""
-    address = ctypes.addressof(ctypes.c_char.from_buffer(buffer))
-    size = len(buffer)
+    address = ctypes.addressof(ctypes.c_char.from_buffer(buf))
+    size = len(buf)
     if os_name == "Linux" or os_name == "Darwin":
         if MLOCK(address, size) != 0:
             raise RuntimeError("Failed to lock memory")
     elif os_name == "Windows":
-        if VirtualLock(ctypes.addressof(buffer), ctypes.sizeof(buffer)) == 0:
+        buf_ptr = ctypes.c_void_p(ctypes.addressof(ctypes.c_char.from_buffer(buf)))
+        size = ctypes.sizeof(ctypes.c_char) * len(buf)
+        if VirtualLock(buf_ptr, size) == 0:
             raise RuntimeError("VirtualLock failed")
     else:
         raise RuntimeError(f"Unsupported OS: {os_name}")
 
 
-def unlock_memory(buffer):
+def unlock_memory(buf):
     """Unlocks the memory of the given buffer."""
-    address = ctypes.addressof(ctypes.c_char.from_buffer(buffer))
-    size = len(buffer)
+    address = ctypes.addressof(ctypes.c_char.from_buffer(buf))
+    size = len(buf)
     if os_name == "Linux" or os_name == "Darwin":
         if MUNLOCK(address, size) != 0:
             raise RuntimeError("Failed to unlock memory")
     elif os_name == "Windows":
-        if VirtualUnlock(ctypes.addressof(buffer), ctypes.sizeof(buffer)) == 0:
+        buf_ptr = ctypes.c_void_p(ctypes.addressof(ctypes.c_char.from_buffer(buf)))
+        size = ctypes.sizeof(ctypes.c_char) * len(buf)
+        if VirtualUnlock(buf_ptr, size) == 0:
             raise RuntimeError("VirtualUnlock failed")
     else:
         raise RuntimeError(f"Unsupported OS: {os_name}")
