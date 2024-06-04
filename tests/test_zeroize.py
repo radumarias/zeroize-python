@@ -14,13 +14,51 @@ elif os_name == "Darwin":
     # Load the C standard library
     LIBC = ctypes.CDLL("libc.dylib")
 elif os_name == "Windows":
-    # Load necessary libraries
+    # Define constants
+    PAGE_READWRITE = 0x04
+    MEM_COMMIT = 0x1000
+    MEM_RESERVE = 0x2000
+    
+    # Load kernel32 library
     kernel32 = ctypes.windll.kernel32
-    ntdll = ctypes.windll.ntdll
+    
+    # Enable the SeLockMemoryPrivilege privilege
+    def enable_lock_memory_privilege():
+        TOKEN_ADJUST_PRIVILEGES = 0x0020
+        TOKEN_QUERY = 0x0008
+        SE_PRIVILEGE_ENABLED = 0x0002
+        privilege_name = "SeLockMemoryPrivilege"
 
-    # Define NtLockVirtualMemory and NtUnlockVirtualMemory
-    NtLockVirtualMemory = ntdll.NtLockVirtualMemory
-    NtUnlockVirtualMemory = ntdll.NtUnlockVirtualMemory
+        class LUID(ctypes.Structure):
+            _fields_ = [("LowPart", ctypes.c_uint32), ("HighPart", ctypes.c_int32)]
+
+        class LUID_AND_ATTRIBUTES(ctypes.Structure):
+            _fields_ = [("Luid", LUID), ("Attributes", ctypes.c_uint32)]
+
+        class TOKEN_PRIVILEGES(ctypes.Structure):
+            _fields_ = [("PrivilegeCount", ctypes.c_uint32), ("Privileges", LUID_AND_ATTRIBUTES * 1)]
+
+        # Open process token
+        token_handle = ctypes.c_void_p()
+        if not kernel32.OpenProcessToken(kernel32.GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, ctypes.byref(token_handle)):
+            raise ctypes.WinError()
+
+        # Lookup privilege value
+        luid = LUID()
+        if not kernel32.LookupPrivilegeValueW(None, privilege_name, ctypes.byref(luid)):
+            raise ctypes.WinError()
+
+        # Adjust token privileges
+        tp = TOKEN_PRIVILEGES()
+        tp.PrivilegeCount = 1
+        tp.Privileges[0].Luid = luid
+        tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED
+
+        if not kernel32.AdjustTokenPrivileges(token_handle, False, ctypes.byref(tp), ctypes.sizeof(tp), None, None):
+            raise ctypes.WinError()
+
+        # Close the token handle
+        kernel32.CloseHandle(token_handle)        
 else:
     raise RuntimeError(f"Unsupported OS: {os_name}")
 
@@ -43,13 +81,9 @@ def lock_memory(buf):
             raise RuntimeError("Failed to lock memory")
     elif os_name == "Windows":
         buf_ptr = ctypes.c_void_p(ctypes.addressof(ctypes.c_char.from_buffer(buf)))
-        size = ctypes.c_size_t(len(buf))
-        region_size = ctypes.c_size_t(size.value)
-        status = NtLockVirtualMemory(
-            ctypes.windll.kernel32.GetCurrentProcess(), ctypes.byref(buf_ptr), ctypes.byref(region_size), 0
-        )
-        if status != 0:
-            raise RuntimeError(f"NtLockVirtualMemory failed with status code: {status}")
+        size = ctypes.sizeof(ctypes.c_char) * len(buf)
+        if not kernel32.VirtualLock(buf_ptr, size):
+            raise RuntimeError("VirtualLock failed")
     else:
         raise RuntimeError(f"Unsupported OS: {os_name}")
 
@@ -63,13 +97,9 @@ def unlock_memory(buf):
             raise RuntimeError("Failed to unlock memory")
     elif os_name == "Windows":
         buf_ptr = ctypes.c_void_p(ctypes.addressof(ctypes.c_char.from_buffer(buf)))
-        size = ctypes.c_size_t(len(buf))
-        region_size = ctypes.c_size_t(size.value)
-        status = NtUnlockVirtualMemory(
-            ctypes.windll.kernel32.GetCurrentProcess(), ctypes.byref(buf_ptr), ctypes.byref(region_size), 0
-        )
-        if status != 0:
-            raise RuntimeError(f"NtUnlockVirtualMemory failed with status code: {status}")
+        size = ctypes.sizeof(ctypes.c_char) * len(buf)
+        if not kernel32.VirtualUnlock(buf_ptr, size):
+            raise RuntimeError("VirtualUnlock failed")
     else:
         raise RuntimeError(f"Unsupported OS: {os_name}")
 
@@ -135,4 +165,8 @@ class TestStringMethods(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    if os_name == "Windows":
+        # Enable the privilege to lock memory
+        enable_lock_memory_privilege()
+        
     unittest.main()
