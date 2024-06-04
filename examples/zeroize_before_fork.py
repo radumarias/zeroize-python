@@ -33,6 +33,7 @@ def unlock_memory(buffer):
 
 if __name__ == "__main__":
     try:
+        # max size you can lock is 4MB, at least on Linux
         sensitive_data = bytearray(b"Sensitive Information")
         lock_memory(sensitive_data)
 

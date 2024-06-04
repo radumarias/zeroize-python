@@ -1,8 +1,6 @@
 import unittest
 import zeroize
 import numpy as np
-
-
 import ctypes
 
 
@@ -41,16 +39,6 @@ SIZES_MB = [
     1,
     2,
     4,
-    8,
-    16,
-    32,
-    64,
-    128,
-    256,
-    512,
-    1024,
-    2 * 1024,
-    4 * 1024,
 ]
 
 
@@ -71,6 +59,7 @@ class TestStringMethods(unittest.TestCase):
     def test_zeroize_np(self):
         try:
             arr = np.array([0] * 10, dtype=np.uint8)
+            lock_memory(arr)
             arr[:] = bytes(b"1234567890")
             zeroize.zeroize_np(arr)
             self.assertEqual(True, all(arr == 0))
@@ -82,6 +71,7 @@ class TestStringMethods(unittest.TestCase):
         for size in SIZES_MB:
             try:
                 arr = bytearray(int(size * 1024 * 1024))
+                lock_memory(arr)
                 zeroize.zeroize1(arr)
                 self.assertEqual(arr, bytearray(int(size * 1024 * 1024)))
 
@@ -89,10 +79,11 @@ class TestStringMethods(unittest.TestCase):
                 unlock_memory(arr)
 
     def test_zeroize_np_sizes(self):
-        for size in [size for size in SIZES_MB if size < 4]:
+        for size in SIZES_MB:
             try:
                 array_size = int(size * 1024 * 1024)
                 random_array = np.random.randint(0, 256, array_size, dtype=np.uint8)
+                lock_memory(random_array)
                 zeroize.zeroize_np(random_array)
                 self.assertEqual(True, all(random_array == 0))
             finally:

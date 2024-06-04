@@ -35,9 +35,11 @@ if __name__ == "__main__":
         print("allocate memory")
 
         # regular array
+        # max size you can lock is 4MB, at least on Linux
         arr = bytearray(b"1234567890")
 
         # numpy array
+        # max size you can lock is 4MB, at least on Linux
         arr_np = np.array([0] * 10, dtype=np.uint8)
         arr_np[:] = arr
         assert arr_np.tobytes() == b"1234567890"
