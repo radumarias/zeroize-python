@@ -97,7 +97,7 @@ if __name__ == "__main__":
         munlock(sensitive_data)
 ```
 
-# Building from source
+# Build from source
 
 ## Browser
 
