@@ -49,7 +49,7 @@ jobs:
         python -m venv .env
         source .env/bin/activate
         pip install -r requirements.txt        
-        maturin develop --release        
+        maturin develop --release
     - name: Run tests
       run: |
         source .env/bin/activate
@@ -73,7 +73,8 @@ jobs:
         python -m venv .env
         .env\Scripts\activate
         pip install -r requirements.txt        
-        maturin develop --release        
+        maturin develop --release
+        maturin build --release
     - name: Run tests
       run: |
         .env\Scripts\activate
