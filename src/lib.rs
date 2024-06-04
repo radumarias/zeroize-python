@@ -24,78 +24,66 @@ static mut INITIALIZED: bool = false;
 #[pymodule]
 fn zeroize<'py>(_py: Python, m: &Bound<'py, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(zeroize1, m)?)?;
-    m.add_function(wrap_pyfunction!(zeroize_np, m)?)?;
     // m.add_function(wrap_pyfunction!(zeroize_mv, m)?)?;
     m.add_function(wrap_pyfunction!(mlock, m)?)?;
     m.add_function(wrap_pyfunction!(munlock, m)?)?;
-    m.add_function(wrap_pyfunction!(mlock_np, m)?)?;
-    m.add_function(wrap_pyfunction!(munlock_np, m)?)?;
     Ok(())
 }
 
 
 #[pyfunction]
-fn zeroize1<'py>(arr: &Bound<'py, PyByteArray>) -> PyResult<()> {
-    unsafe { arr.as_bytes_mut().zeroize(); }
+fn zeroize1<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
+    as_array(arr)?.zeroize();
     Ok(())
 }
 
 #[pyfunction]
-fn zeroize_np<'py>(arr: &Bound<'py, PyArray1<u8>>) -> PyResult<()> {
-    unsafe { arr.as_slice_mut().unwrap().zeroize(); }
-    Ok(())
-}
-
-#[pyfunction]
-fn mlock<'py>(arr: &Bound<'py, PyByteArray>) -> PyResult<()> {
+fn mlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
+    if !init() {
+        return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+            "libsodium failed to initialize",
+        ));
+    }
     unsafe {
-        if !init() {
-            panic!("libsodium failed to initialize")
-        }
-        if !_mlock(arr.as_bytes_mut().as_mut_ptr()) {
-            panic!("mlock failed")
+        if !_mlock(as_array(arr)?.as_mut_ptr()) {
+            return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+                "mlock failed",
+            ));
         }
     }
     Ok(())
 }
 
 #[pyfunction]
-fn mlock_np<'py>(arr: &Bound<'py, PyArray1<u8>>) -> PyResult<()> {
+fn munlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
+    if !init() {
+        return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+            "libsodium failed to initialize",
+        ));
+    }
     unsafe {
-        if !init() {
-            panic!("libsodium failed to initialize")
-        }
-        if !_mlock(arr.as_slice_mut().unwrap().as_mut_ptr()) {
-            panic!("mlock failed")
+        if !_munlock(as_array(arr)?.as_mut_ptr()) {
+            return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+                "mlock failed",
+            ));
         }
     }
     Ok(())
 }
 
-#[pyfunction]
-fn munlock<'py>(arr: &Bound<'py, PyByteArray>) -> PyResult<()> {
-    unsafe {
-        if !init() {
-            panic!("libsodium failed to initialize")
+fn as_array<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a mut [u8]> {
+    let arr = unsafe {
+        if let Ok(arr) = arr.downcast::<PyByteArray>() {
+            arr.as_bytes_mut()
+        } else if let Ok(arr) = arr.downcast::<PyArray1<u8>>() {
+            arr.as_slice_mut().unwrap()
+        } else {
+            return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+                "Expected a PyByteArray or PyArray1<u8>",
+            ));
         }
-        if !_munlock(arr.as_bytes_mut().as_mut_ptr()) {
-            panic!("mlock failed")
-        }
-    }
-    Ok(())
-}
-
-#[pyfunction]
-fn munlock_np<'py>(arr: &Bound<'py, PyArray1<u8>>) -> PyResult<()> {
-    unsafe {
-        if !init() {
-            panic!("libsodium failed to initialize")
-        }
-        if !_munlock(arr.as_slice_mut().unwrap().as_mut_ptr()) {
-            panic!("mlock failed")
-        }
-    }
-    Ok(())
+    };
+    Ok(arr)
 }
 
 // #[pyfunction]
@@ -121,7 +109,7 @@ fn munlock_np<'py>(arr: &Bound<'py, PyArray1<u8>>) -> PyResult<()> {
 /// not* be used.
 ///
 /// Calling it multiple times is a no-op.
-pub(crate) fn init() -> bool {
+fn init() -> bool {
     unsafe {
         INIT.call_once(|| {
             // NOTE: Calls to transmute fail to compile if the source

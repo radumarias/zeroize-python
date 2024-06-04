@@ -1,6 +1,6 @@
 """By itself it doesn't work if memory is moved or moved to swap. You can use `crypes` with `libc.mlock()` to lock the memory"""
 
-from zeroize import zeroize1, zeroize_np, mlock, munlock, mlock_np, munlock_np
+from zeroize import zeroize1, mlock, munlock
 import numpy as np
 
 
@@ -21,11 +21,11 @@ if __name__ == "__main__":
         print("locking memory")
 
         mlock(arr)
-        mlock_np(arr_np)
+        mlock(arr_np)
 
         print("zeroize'ing...: ")
         zeroize1(arr)
-        zeroize_np(arr_np)
+        zeroize1(arr_np)
 
         print("checking if is zeroized")
         assert arr == bytearray(b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
@@ -37,4 +37,4 @@ if __name__ == "__main__":
         # Unlock the memory
         print("unlocking memory")
         munlock(arr)
-        munlock_np(arr_np)
+        munlock(arr_np)
