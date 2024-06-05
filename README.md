@@ -5,7 +5,6 @@
 [![tests](https://github.com/radumarias/zeroize-python/actions/workflows/tests.yml/badge.svg)](https://github.com/radumarias/zeroize-python/actions/workflows/tests.yml)  
 
 Securely clear secrets from memory. Built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler.
-Uses a portable pure Rust implementation that works everywhere.
 
 It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood to zeroize and [libsodium-sys](https://crates.io/crates/libsodium-sys) for `mlock()` and `munlock()`.  
 It can work with `bytearray` and `numpy array`.
