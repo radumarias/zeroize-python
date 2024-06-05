@@ -6,7 +6,7 @@ from zeroize import zeroize1, mlock, munlock
 
 if __name__ == "__main__":
     try:
-        # max size you can lock is 4MB, at least on Linux
+        # Maximum you can mlock is 4MB
         sensitive_data = bytearray(b"Sensitive Information")
         mlock(sensitive_data)
 
@@ -23,6 +23,8 @@ if __name__ == "__main__":
         else:
             # This is the parent process
             os.wait()  # Wait for the child process to exit
+        
+        print("all good, bye!")
 
     finally:
         # Unlock the memory

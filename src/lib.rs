@@ -11,8 +11,7 @@ use libsodium_sys::{
 };
 use numpy::{PyArray1, PyArrayMethods};
 use pyo3::prelude::*;
-use pyo3::pybacked::PyBackedBytes;
-use pyo3::types::{PyByteArray, PyBytes, PyCFunction};
+use pyo3::types::{PyByteArray, PyBytes};
 use zeroize_rs::Zeroize;
 
 /// The global [`sync::Once`] that ensures we only perform
@@ -48,7 +47,8 @@ fn mlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
         ));
     }
     unsafe {
-        if !_mlock(as_array_mut(arr)?.as_mut_ptr()) {
+        let arr = as_array_mut(arr)?;
+        if !_mlock(arr.as_mut_ptr(), arr.len()) {
             return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
                 "mlock failed",
             ));
@@ -65,7 +65,8 @@ fn munlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
         ));
     }
     unsafe {
-        if !_munlock(as_array_mut(arr)?.as_mut_ptr()) {
+        let arr = as_array_mut(arr)?;
+        if !_munlock(arr.as_mut_ptr(), arr.len()) {
             return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
                 "mlock failed",
             ));
@@ -159,13 +160,13 @@ fn init() -> bool {
 }
 
 /// Calls the platform's underlying `mlock(2)` implementation.
-unsafe fn _mlock<T>(ptr: *mut T) -> bool {
-    sodium_mlock(ptr.cast(), mem::size_of::<T>()) == 0
+unsafe fn _mlock<T>(ptr: *mut T, len: usize) -> bool {
+    sodium_mlock(ptr.cast(), len) == 0
 }
 
 /// Calls the platform's underlying `munlock(2)` implementation.
-unsafe fn _munlock<T>(ptr: *mut T) -> bool {
-    sodium_munlock(ptr.cast(), mem::size_of::<T>()) == 0
+unsafe fn _munlock<T>(ptr: *mut T, len: usize) -> bool {
+    sodium_munlock(ptr.cast(), len) == 0
 }
 
 #[cfg(test)]

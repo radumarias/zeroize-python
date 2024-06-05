@@ -9,9 +9,11 @@ if __name__ == "__main__":
         print("allocate memory")
 
         # regular array
+        # Maximum you can mlock is 4MB
         arr = bytearray(b"1234567890")
 
         # numpy array
+        # Maximum you can mlock is 4MB
         arr_np = np.array([0] * 10, dtype=np.uint8)
         arr_np[:] = arr
         assert arr_np.tobytes() == b"1234567890"

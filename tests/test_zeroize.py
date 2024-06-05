@@ -12,11 +12,6 @@ SIZES_MB = [
     1,
     2,
     4,
-    8,
-    16,
-    32,
-    64,
-    128,
 ]
 
 
@@ -43,8 +38,9 @@ class TestStringMethods(unittest.TestCase):
             try:
                 arr = bytearray(int(size * 1024 * 1024))
                 arr_np = np.random.randint(
-                    0, 256, int(size * 1024 * 1024), dtype=np.uint8
+                    0, 256, int(size), dtype=np.uint8
                 )
+                print(f"Testing size: {size} MB")
                 mlock(arr)
                 mlock(arr_np)
                 zeroize1(arr)

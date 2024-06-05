@@ -6,7 +6,7 @@
 
 Securely clear secrets from memory. Built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler.
 
-It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood to zeroize and [libsodium-sys](https://crates.io/crates/libsodium-sys) for `mlock()` and `munlock()`.  
+It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood to zeroize and [libsodium-sys](https://crates.io/crates/libsodium-sys) for `mlock()` and `munlock()`. **Maximum you can mlock is 4MB**.  
 It can work with `bytearray` and `numpy array`.
 
 > [!WARNING]
@@ -29,11 +29,11 @@ if __name__ == "__main__":
         print("allocate memory")
 
         # regular array
-        # max size you can lock is 4MB, at least on Linux
+        # Maximum you can mlock is 4MB
         arr = bytearray(b"1234567890")
 
         # numpy array
-        # max size you can lock is 4MB, at least on Linux
+        # Maximum you can mlock is 4MB
         arr_np = np.array([0] * 10, dtype=np.uint8)
         arr_np[:] = arr
         assert arr_np.tobytes() == b"1234567890"
@@ -72,7 +72,7 @@ from zeroize import zeroize1, mlock, munlock
 
 if __name__ == "__main__":
     try:
-        # max size you can lock is 4MB, at least on Linux
+        # Maximum you can mlock is 4MB
         sensitive_data = bytearray(b"Sensitive Information")
         mlock(sensitive_data)
 
@@ -89,6 +89,8 @@ if __name__ == "__main__":
         else:
             # This is the parent process
             os.wait()  # Wait for the child process to exit
+        
+        print("all good, bye!")
 
     finally:
         # Unlock the memory
