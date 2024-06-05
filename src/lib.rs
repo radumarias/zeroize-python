@@ -1,26 +1,11 @@
 use std::any::Any;
-use std::mem;
 use std::ops::Deref;
-use std::sync::Once;
 
 use libc::{self, size_t};
-use libsodium_sys::{
-    sodium_init
-    , sodium_mlock
-    , sodium_munlock,
-};
 use numpy::{PyArray1, PyArrayMethods};
 use pyo3::prelude::*;
 use pyo3::types::{PyByteArray, PyBytes};
 use zeroize_rs::Zeroize;
-
-/// The global [`sync::Once`] that ensures we only perform
-/// library initialization one time.
-static INIT: Once = Once::new();
-
-/// A flag that returns whether this library has been safely
-/// initialized.
-static mut INITIALIZED: bool = false;
 
 /// A Python module implemented in Rust.
 #[pymodule]
@@ -41,11 +26,6 @@ fn zeroize1<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
 
 #[pyfunction]
 fn mlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
-    if !init() {
-        return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-            "libsodium failed to initialize",
-        ));
-    }
     unsafe {
         let arr = as_array_mut(arr)?;
         if !_mlock(arr.as_mut_ptr(), arr.len()) {
@@ -59,11 +39,6 @@ fn mlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
 
 #[pyfunction]
 fn munlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
-    if !init() {
-        return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-            "libsodium failed to initialize",
-        ));
-    }
     unsafe {
         let arr = as_array_mut(arr)?;
         if !_munlock(arr.as_mut_ptr(), arr.len()) {
@@ -123,50 +98,14 @@ fn as_array<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a [u8]> {
 //     Ok(())
 // }
 
-/// Initialized libsodium. This function *must* be called at least once
-/// prior to using any of the other functions in this library, and
-/// callers *must* verify that it returns `true`. If it returns `false`,
-/// libsodium was unable to be properly set up and this library *must
-/// not* be used.
-///
-/// Calling it multiple times is a no-op.
-fn init() -> bool {
-    unsafe {
-        INIT.call_once(|| {
-            // NOTE: Calls to transmute fail to compile if the source
-            // and destination type have a different size. We (ab)use
-            // this fact to statically assert the size of types at
-            // compile-time.
-            //
-            // We assume that we can freely cast between rust array
-            // sizes and [`libc::size_t`]. If that's not true, DO NOT
-            // COMPILE.
-            #[allow(clippy::useless_transmute)]
-                let _ = std::mem::transmute::<usize, size_t>(0);
-
-            let mut failure = false;
-
-            // sodium_init returns 0 on success, -1 on failure, and 1 if
-            // the library is already initialized; someone else might
-            // have already initialized it before us, so we only care
-            // about failure
-            failure |= sodium_init() == -1;
-
-            INITIALIZED = !failure;
-        });
-
-        INITIALIZED
-    }
-}
-
 /// Calls the platform's underlying `mlock(2)` implementation.
-unsafe fn _mlock<T>(ptr: *mut T, len: usize) -> bool {
-    sodium_mlock(ptr.cast(), len) == 0
+unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
+    memsec::mlock(ptr, len)
 }
 
 /// Calls the platform's underlying `munlock(2)` implementation.
-unsafe fn _munlock<T>(ptr: *mut T, len: usize) -> bool {
-    sodium_munlock(ptr.cast(), len) == 0
+unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
+    memsec::munlock(ptr, len)
 }
 
 #[cfg(test)]
