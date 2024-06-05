@@ -111,11 +111,35 @@ unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
 #[cfg(test)]
 mod test {
     use zeroize_rs::Zeroize;
+    use super::{_mlock, _munlock};
 
     #[test]
     fn test_zeroize() {
         let mut arr = [1, 2, 3, 4, 5];
         arr.zeroize();
         assert_eq!(arr, [0, 0, 0, 0, 0]);
+    }
+
+    #[test]
+    fn test_mlock() {
+        let mut arr = [1, 2, 3, 4, 5];
+        let mut arr2 = vec![0; 4096];
+        let mut arr3 = vec![0; 4096 * 4096];
+        unsafe {
+            let ptr = arr.as_mut_ptr();
+            let len = arr.len();
+            _mlock(ptr, len);
+            _munlock(ptr, len);
+
+            let ptr = arr2.as_mut_ptr();
+            let len = arr2.len();
+            _mlock(ptr, len);
+            _munlock(ptr, len);
+
+            let ptr = arr3.as_mut_ptr();
+            let len = arr3.len();
+            _mlock(ptr, len);
+            _munlock(ptr, len);
+        }
     }
 }
