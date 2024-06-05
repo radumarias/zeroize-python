@@ -13,6 +13,9 @@ It can work with `bytearray` and `numpy array`.
 > **In the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write) you need to zeroize the memory before forking the child process, see example below.  
 > Also by itself it doesn't work if memory is moved or moved to swap. You can use `zeroize.mlock()` to lock the memory, see example below.**
 
+# Caveats of `mlock()`
+`mlock` works on pages, so 2 variables could reside in the same page and if you `munlock` one it will `munlock` the whole page and also the memory for the other variable. Ideally you could `munlock` all your vars at same time so it would not be affected by the overlap. One strategy could be to expire your vars that store credentials when not used and to reload them again when needed. Like that you could `mlock` when you load them and `munlock` on expire and keep all vars under the same expire policy. Like this all var will be `munlock`ed at the same time.
+
 # Examples
 
 ## Lock and zeroize memory
