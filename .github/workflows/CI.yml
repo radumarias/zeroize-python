@@ -24,7 +24,27 @@ jobs:
       - id: check_version
         uses: radumarias/action-check-version-changed-rust@v1
   
-  test_linux:
+  test_rust:
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust nightly
+        run: rustup default nightly && rustup update && rustup component add rustfmt
+
+      - name: Fmt check
+        run: cargo fmt --check
+      
+      - name: Check
+        run: cargo check
+      
+      - name: Tests
+        run: cargo test
+        
+  test_py_linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -49,7 +69,8 @@ jobs:
         source .env/bin/activate
         ./tests.sh
 
-  test_macos:
+  test_py_macos:
+    needs: [test_rust]
     runs-on: macos-latest
     strategy:
       matrix:
@@ -74,7 +95,8 @@ jobs:
         source .env/bin/activate
         ./tests.sh
 
-  test_windows:
+  test_py_windows:
+    needs: [test_rust]
     runs-on: windows-latest
     strategy:
       matrix:
@@ -101,7 +123,7 @@ jobs:
         python examples/lock_and_zeroize.py
 
   build_linux:
-    needs: [test_linux, test_macos, test_windows]
+    needs: [test_rust, test_py_linux, test_py_macos, test_py_windows]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -137,7 +159,7 @@ jobs:
           path: dist
 
   build_windows:
-    needs: [test_linux, test_macos, test_windows]
+    needs: [test_rust, test_py_linux, test_py_macos, test_py_windows]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -165,7 +187,7 @@ jobs:
           path: dist
 
   build_macos:
-    needs: [test_linux, test_macos, test_windows]
+    needs: [test_rust, test_py_linux, test_py_macos, test_py_windows]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -192,7 +214,7 @@ jobs:
           path: dist
 
   build_sdist:
-    needs: [test_linux, test_macos, test_windows]
+    needs: [test_rust, test_py_linux, test_py_macos, test_py_windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
