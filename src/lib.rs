@@ -1,7 +1,3 @@
-use std::any::Any;
-use std::ops::Deref;
-
-use libc::{self, size_t};
 use numpy::{PyArray1, PyArrayMethods};
 use pyo3::prelude::*;
 use pyo3::types::{PyByteArray, PyBytes};
@@ -64,6 +60,7 @@ fn as_array_mut<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a mut [u8]> {
     Ok(arr)
 }
 
+#[allow(dead_code)]
 fn as_array<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a [u8]> {
     let arr = unsafe {
         if let Ok(arr) = arr.downcast::<PyByteArray>() {
