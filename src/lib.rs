@@ -17,7 +17,6 @@ fn zeroize<'py>(_py: Python, m: &Bound<'py, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
-
 #[pyfunction]
 fn zeroize1<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
     as_array_mut(arr)?.zeroize();
@@ -110,8 +109,8 @@ unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
 
 #[cfg(test)]
 mod test {
-    use zeroize_rs::Zeroize;
     use super::{_mlock, _munlock};
+    use zeroize_rs::Zeroize;
 
     #[test]
     fn test_zeroize() {
