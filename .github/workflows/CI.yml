@@ -12,7 +12,7 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: 0 # TODO: remove this when we cache the builds
-  #![deny(warnings)]
+  RUSTFLAGS: "-Dwarnings"
   
 jobs:
   check_version:
