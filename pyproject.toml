@@ -27,8 +27,8 @@ classifiers = [
     "Intended Audience :: Education",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Science/Research",
-    "Topic :: Education"
-    "Topic :: Software Development :: Libraries"
+    "Topic :: Education",
+    "Topic :: Software Development :: Libraries",
     "License :: OSI Approved :: Apache Software License",
     "License :: OSI Approved :: MIT License"
 ]
