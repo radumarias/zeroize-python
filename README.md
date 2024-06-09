@@ -1,4 +1,4 @@
-# Zeroize
+# zeroize
 
 [![PyPI version](https://badge.fury.io/py/zeroize.svg)](https://badge.fury.io/py/zeroize)
 [![CI](https://github.com/radumarias/zeroize-python/actions/workflows/CI.yml/badge.svg)](https://github.com/radumarias/zeroize-python/actions/workflows/CI.yml)
@@ -134,3 +134,25 @@ maturin develop
 python examples/lock_and_zeroize.py
 python examples/zeroize_before_fork.py
 ```
+
+# Contribute
+
+Feel free to fork it, change and use it in any way that you want. If you build something interesting and feel like sharing pull requests are always appreciated.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this project by you, as defined in the Apache License, shall be dual-licensed as above, without any additional terms or conditions.
+
+## How to contribute
+
+1. Fork the repo
+2. Make the changes in your fork
+3. Add tests for your changes, if applicable
+4. `cargo build --all --all-features` and fix any issues
+5. `cargo fmt --all`, you can cnofigure your IDE to do this on save [RustRover](https://www.jetbrains.com/help/rust/rustfmt.html) and [VSCode](https://code.visualstudio.com/docs/languages/rust#_formatting)
+6. `cargo check --all --all-features` and fix any errors and warnings
+7. `cargo clippy --all --all-features -- -D warnings` and fix any errors
+8. `cargo test --all --all-features` and fix any issues
+9. `cargo bench --all --all-features` and fix any issues
+10. Create a PR
+11. Monitor the checks (GitHub actions runned)
+12. Respond to any comments
+13. In the end ideally it will be merged to `main`
