@@ -8,7 +8,7 @@ Securely clear secrets from memory. Built on stable Rust primitives which guaran
 It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood to zeroize and [libsodium-sys](https://crates.io/crates/libsodium-sys) for `mlock()` and `munlock()`. **Maximum you can mlock is 4MB**.  
 It can work with `bytearray` and `numpy array`.
 
-> [!WARNING]
+> [!WARNING]  
 > **In the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write) you need to zeroize the memory before forking the child process, see example below.  
 > Also by itself it doesn't work if memory is moved or moved to swap. You can use `zeroize.mlock()` to lock the memory, see example below.**
 
