@@ -5,7 +5,7 @@
 
 Securely clear secrets from memory. Built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler.
 
-It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood to zeroize and [libsodium-sys](https://crates.io/crates/libsodium-sys) for `mlock()` and `munlock()`. **Maximum you can mlock is 4MB**.  
+It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood to zeroize and [memsec](https://crates.io/crates/memsec) for `mlock()` and `munlock()`. **Maximum you can mlock is 4MB**.  
 It can work with `bytearray` and `numpy array`.
 
 > [!WARNING]  
@@ -13,6 +13,7 @@ It can work with `bytearray` and `numpy array`.
 > Also by itself it doesn't work if memory is moved or moved to swap. You can use `zeroize.mlock()` to lock the memory, see example below.**
 
 # Caveats of `mlock()`
+
 `mlock` works on pages, so 2 variables could reside in the same page and if you `munlock` one it will `munlock` the whole page and also the memory for the other variable. Ideally you could `munlock` all your vars at same time so it would not be affected by the overlap. One strategy could be to expire your vars that store credentials when not used and to reload them again when needed. Like that you could `mlock` when you load them and `munlock` on expire and keep all vars under the same expire policy. Like this all var will be `munlock`ed at the same time.
 
 # Examples
@@ -65,9 +66,8 @@ if __name__ == "__main__":
 ## Zeroing memory before forking child process
 
 This mitigates the problems that appears on [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write). You need to zeroize the data before forking the child process.
-```python
-""" In the case of [Copy-on-write fork](https://en.wikipedia.org/wiki/Copy-on-write) you need to zeroize the memory before forking the child process. """
 
+```python
 import os
 from zeroize import zeroize1, mlock, munlock
 
@@ -109,6 +109,7 @@ if __name__ == "__main__":
 [![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/?repo=radumarias%2Fzeroize-python&ref=main)
 
 ## Geting sources from GitHub
+
 Skip this if you're starting it in browser.
 
 ```bash
@@ -120,13 +121,16 @@ git clone https://github.com/radumarias/zeroize-python && cd zeroize-python
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
+
 To configure your current shell, you need to source
 the corresponding env file under $HOME/.cargo.
 This is usually done by running one of the following (note the leading DOT):
+
 ```bash
 . "$HOME/.cargo/env"
 ```
-```
+
+```bash
 python -m venv .env
 source .env/bin/activate
 pip install -r requirements.txt
