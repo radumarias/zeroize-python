@@ -1,3 +1,4 @@
+#![deny(warnings)]
 use numpy::{PyArray1, PyArrayMethods};
 use pyo3::prelude::*;
 use pyo3::types::{PyByteArray, PyBytes};
