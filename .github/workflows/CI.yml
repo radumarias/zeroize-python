@@ -11,6 +11,8 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0 # TODO: remove this when we cache the builds
+  #![deny(warnings)]
   
 jobs:
   check_version:
@@ -35,8 +37,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust
-        run: rustup default stable && rustup update && rustup component add rustfmt
+      - name: Setup Rust
+        run: rustup update    
 
       - name: Fmt check
         run: cargo fmt --check
@@ -143,6 +145,8 @@ jobs:
             target: ppc64le
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Rust
+        run: rustup update      
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
@@ -171,6 +175,8 @@ jobs:
             target: x86
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Rust
+        run: rustup update
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
@@ -199,6 +205,8 @@ jobs:
             target: aarch64
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Rust
+        run: rustup update
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
@@ -239,6 +247,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        run: rustup update      
 
       - uses: ncipollo/release-action@v1
         name: Create release
