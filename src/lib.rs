@@ -54,7 +54,7 @@ fn as_array_mut<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a mut [u8]> {
             arr.as_slice_mut().unwrap()
         } else {
             return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-                "Expected a PyByteArray or PyArray1<u8>",
+                "Expected a bytearray or numpy.array",
             ));
         }
     };
@@ -72,7 +72,7 @@ fn as_array<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a [u8]> {
             arr.as_slice().unwrap()
         } else {
             return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-                "Expected a PyByteArray or PyArray1<u8>",
+                "Expected a bytearray, bytes or numpy.array",
             ));
         }
     };
