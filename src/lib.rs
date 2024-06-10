@@ -6,7 +6,7 @@ use zeroize_rs::Zeroize;
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn zeroize<'py>(_py: Python, m: &Bound<'py, PyModule>) -> PyResult<()> {
+fn zeroize(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(zeroize1, m)?)?;
     // m.add_function(wrap_pyfunction!(zeroize_mv, m)?)?;
     m.add_function(wrap_pyfunction!(mlock, m)?)?;
@@ -15,13 +15,13 @@ fn zeroize<'py>(_py: Python, m: &Bound<'py, PyModule>) -> PyResult<()> {
 }
 
 #[pyfunction]
-fn zeroize1<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
+fn zeroize1(arr: &Bound<'_, PyAny>) -> PyResult<()> {
     as_array_mut(arr)?.zeroize();
     Ok(())
 }
 
 #[pyfunction]
-fn mlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
+fn mlock(arr: &Bound<'_, PyAny>) -> PyResult<()> {
     unsafe {
         let arr = as_array_mut(arr)?;
         if !_mlock(arr.as_mut_ptr(), arr.len()) {
@@ -34,7 +34,7 @@ fn mlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
 }
 
 #[pyfunction]
-fn munlock<'py>(arr: &Bound<'py, PyAny>) -> PyResult<()> {
+fn munlock(arr: &Bound<'_, PyAny>) -> PyResult<()> {
     unsafe {
         let arr = as_array_mut(arr)?;
         if !_munlock(arr.as_mut_ptr(), arr.len()) {
