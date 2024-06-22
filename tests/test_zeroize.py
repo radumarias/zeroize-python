@@ -5,6 +5,36 @@ import os
 import array
 import random
 import ctypes
+import platform
+import sys
+
+
+# Functions for locking and unlocking memory
+def lock_memory(address, size):
+    if platform.system() == 'Linux':
+        # On Linux, use mlock
+        libc = ctypes.CDLL('libc.so.6')
+        if libc.mlock(address, size) != 0:
+            raise RuntimeError("Failed to lock memory")
+    elif platform.system() == 'Windows':
+        # On Windows, use VirtualLock
+        if not ctypes.windll.kernel32.VirtualLock(address, size):
+            raise RuntimeError("Failed to lock memory")
+    else:
+        raise NotImplementedError(f"Unsupported platform: {platform.system()}")
+
+def unlock_memory(address, size):
+    if platform.system() == 'Linux':
+        # On Linux, use munlock
+        libc = ctypes.CDLL('libc.so.6')
+        if libc.munlock(address, size) != 0:
+            raise RuntimeError("Failed to unlock memory")
+    elif platform.system() == 'Windows':
+        # On Windows, use VirtualUnlock
+        if not ctypes.windll.kernel32.VirtualUnlock(address, size):
+            raise RuntimeError("Failed to unlock memory")
+    else:
+        raise NotImplementedError(f"Unsupported platform: {platform.system()}")
 
 
 SIZES_MB = [
@@ -55,19 +85,16 @@ class TestStringMethods(unittest.TestCase):
 #                 print("mlock array.array")
 #                 mlock(arr2)
 
-                buffer_address = arr.buffer_info()[0]
-                buffer_size = arr.buffer_info()[1] * arr.itemsize
+                address = (ctypes.c_char * len(data)).from_buffer(data)
+                size = len(data)
 
-                buffer_address2 = arr2.buffer_info()[0]
-                buffer_size2 = arr2.buffer_info()[1] * arr2.itemsize
+                address2 = arr2.buffer_info()[0]
+                size2 = arr2.buffer_info()[1] * arr2.itemsize
 
-                VirtualLock = ctypes.windll.kernel32.VirtualLock
-                VirtualLock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
-                VirtualLock.restype = ctypes.c_bool
-
-                VirtualUnlock = ctypes.windll.kernel32.VirtualUnlock
-                VirtualUnlock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
-                VirtualUnlock.restype = ctypes.c_bool
+                print("lock arr")
+                lock_memory(address, size)
+                print("lock arr2")
+                lock_memory(address2, size2)
 
                 if not VirtualLock(ctypes.c_void_p(buffer_address), ctypes.c_size_t(buffer_size)):
                     raise RuntimeError("Failed to lock memory")
