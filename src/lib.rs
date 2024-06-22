@@ -99,8 +99,7 @@ fn as_array<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a [u8]> {
 /// Calls the platform's underlying `mlock(2)` implementation.
 unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
     // memsec::mlock(ptr, len)
-    let r = region::lock(ptr, len).is_ok();
-    r
+    region::lock(ptr, len).is_ok()
 }
 
 /// Calls the platform's underlying `munlock(2)` implementation.
