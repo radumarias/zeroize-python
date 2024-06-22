@@ -86,7 +86,7 @@ class TestStringMethods(unittest.TestCase):
 #                 mlock(arr2)
 
                 address = (ctypes.c_char * len(arr)).from_buffer(arr)
-                size = len(data)
+                size = len(arr)
 
                 address2 = arr2.buffer_info()[0]
                 size2 = arr2.buffer_info()[1] * arr2.itemsize
