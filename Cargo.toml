@@ -1,6 +1,6 @@
 [package]
 name = "zeroize"
-version = "0.4.24"
+version = "0.4.25"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -12,7 +12,7 @@ crate-type = ["cdylib"]
 pyo3 = "0.21.2"
 zeroize_rs = { version = "1.8.1", package = "zeroize"}
 numpy = "0.21"
-memsec = "0.6.3"
+memsec = "0.7.0"
 libc = "0.2.155"
 
 [profile.release]
