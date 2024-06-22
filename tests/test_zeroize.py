@@ -55,8 +55,11 @@ class TestStringMethods(unittest.TestCase):
 #                 print("mlock array.array")
 #                 mlock(arr2)
 
-                buffer_address = arr2.buffer_info()[0]
-                buffer_size = arr2.buffer_info()[1] * arr2.itemsize
+                buffer_address = arr.buffer_info()[0]
+                buffer_size = arr.buffer_info()[1] * arr.itemsize
+
+                buffer_address2 = arr2.buffer_info()[0]
+                buffer_size2 = arr2.buffer_info()[1] * arr2.itemsize
 
                 VirtualLock = ctypes.windll.kernel32.VirtualLock
                 VirtualLock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
@@ -66,15 +69,17 @@ class TestStringMethods(unittest.TestCase):
                 VirtualUnlock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
                 VirtualUnlock.restype = ctypes.c_bool
 
-                if VirtualLock(ctypes.c_void_p(buffer_address), ctypes.c_size_t(buffer_size)):
-                    print("Memory locked")
-                else:
-                    print("Failed to lock memory")
+                if not VirtualLock(ctypes.c_void_p(buffer_address), ctypes.c_size_t(buffer_size)):
+                    raise RuntimeError("Failed to lock memory")
 
-                if VirtualUnlock(ctypes.c_void_p(buffer_address), ctypes.c_size_t(buffer_size)):
-                    print("Memory unlocked")
-                else:
-                    print("Failed to unlock memory")
+                if not VirtualUnlock(ctypes.c_void_p(buffer_address), ctypes.c_size_t(buffer_size)):
+                    raise RuntimeError("Failed to unlock memory")
+
+                if not VirtualLock(ctypes.c_void_p(buffer_address2), ctypes.c_size_t(buffer_size2)):
+                    raise RuntimeError("Failed to lock memory")
+
+                if not VirtualUnlock(ctypes.c_void_p(buffer_address2), ctypes.c_size_t(buffer_size2)):
+                    raise RuntimeError("Failed to unlock memory")
 
                 zeroize1(arr)
                 zeroize1(arr_np)
