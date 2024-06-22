@@ -85,7 +85,7 @@ class TestStringMethods(unittest.TestCase):
 #                 print("mlock array.array")
 #                 mlock(arr2)
 
-                address = (ctypes.c_char * len(data)).from_buffer(data)
+                address = (ctypes.c_char * len(arr)).from_buffer(arr)
                 size = len(data)
 
                 address2 = arr2.buffer_info()[0]
