@@ -4,6 +4,7 @@ import numpy as np
 import os
 import array
 import random
+import ctypes
 
 
 SIZES_MB = [
@@ -46,12 +47,26 @@ class TestStringMethods(unittest.TestCase):
                 arr_np[:] = arr
                 arr2 = array.array('B', (random.randint(0, 255) for _ in range(int(size * 1024 * 1024))))
                 print(f"Testing size: {size} MB")
-                print("mlock bytearray")
+#                 print("mlock bytearray")
                 mlock(arr)
 #                 print("mlock np array")
 #                 mlock(arr_np)
-                print("mlock array.array")
-                mlock(arr2)
+#                 print("mlock array.array")
+#                 mlock(arr2)
+
+                buffer_address = arr2.buffer_info()[0]
+                buffer_size = arr2.buffer_info()[1] * arr2.itemsize
+
+                # Define VirtualLock function from kernel32.dll
+                VirtualLock = ctypes.windll.kernel32.VirtualLock
+                VirtualLock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+                VirtualLock.restype = ctypes.c_bool
+
+                if VirtualLock(ctypes.c_void_p(buffer_address), ctypes.c_size_t(buffer_size)):
+                    print("Memory locked")
+                else:
+                    print("Failed to lock memory")
+
                 zeroize1(arr)
                 zeroize1(arr_np)
                 zeroize1(arr2)
