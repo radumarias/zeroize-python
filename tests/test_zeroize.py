@@ -15,7 +15,8 @@ SIZES_MB = [
     0.5,
     1,
     2,
-    2.97,
+#     2.97,
+    4,
 ]
 
 
@@ -57,15 +58,23 @@ class TestStringMethods(unittest.TestCase):
                 buffer_address = arr2.buffer_info()[0]
                 buffer_size = arr2.buffer_info()[1] * arr2.itemsize
 
-                # Define VirtualLock function from kernel32.dll
                 VirtualLock = ctypes.windll.kernel32.VirtualLock
                 VirtualLock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
                 VirtualLock.restype = ctypes.c_bool
+
+                VirtualUnlock = ctypes.windll.kernel32.VirtualUnlock
+                VirtualUnlock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+                VirtualUnlock.restype = ctypes.c_bool
 
                 if VirtualLock(ctypes.c_void_p(buffer_address), ctypes.c_size_t(buffer_size)):
                     print("Memory locked")
                 else:
                     print("Failed to lock memory")
+
+                if VirtualUnlock(ctypes.c_void_p(buffer_address), ctypes.c_size_t(buffer_size)):
+                    print("Memory unlocked")
+                else:
+                    print("Failed to unlock memory")
 
                 zeroize1(arr)
                 zeroize1(arr_np)
