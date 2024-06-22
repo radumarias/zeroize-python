@@ -1,6 +1,7 @@
 import unittest
 from zeroize import zeroize1, mlock, munlock
 import numpy as np
+import os
 
 
 SIZES_MB = [
@@ -38,7 +39,9 @@ class TestStringMethods(unittest.TestCase):
         for size in SIZES_MB:
             try:
                 arr = bytearray(int(size * 1024 * 1024))
-                arr_np = np.zeros(int(size * 1024 * 1024), dtype=np.uint8)
+                arr[:] = os.urandom(len(arr))
+                arr_np = np.zeros(len(arr), dtype=np.uint8)
+                arr_np[:] = arr
                 print(f"Testing size: {size} MB")
                 print("mlock bytearray")
                 mlock(arr)
