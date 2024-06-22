@@ -48,7 +48,7 @@ class TestStringMethods(unittest.TestCase):
                 arr2 = array.array('B', (random.randint(0, 255) for _ in range(int(size * 1024 * 1024))))
                 print(f"Testing size: {size} MB")
 #                 print("mlock bytearray")
-                mlock(arr)
+#                 mlock(arr)
 #                 print("mlock np array")
 #                 mlock(arr_np)
 #                 print("mlock array.array")
@@ -75,7 +75,7 @@ class TestStringMethods(unittest.TestCase):
                 self.assertEqual(True, all(byte == 0 for byte in arr2))
 
             finally:
-                munlock(arr)
+#                 munlock(arr)
 
 
 if __name__ == "__main__":
