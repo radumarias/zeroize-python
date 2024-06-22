@@ -1,5 +1,5 @@
-@echo off
+set "e=|| exit /b"
 
-pytest
-python examples/lock_and_zeroize.py
-python examples/zeroize_before_fork.py
+pytest %e%
+python examples/lock_and_zeroize.py %e%
+python examples/zeroize_before_fork.py %e%
