@@ -1,6 +1,7 @@
 #![deny(warnings)]
 
 use numpy::{PyArray1, PyArrayMethods};
+use pyo3::buffer::PyBuffer;
 use pyo3::prelude::*;
 use pyo3::types::{PyByteArray, PyBytes};
 use zeroize_rs::Zeroize;
@@ -16,15 +17,15 @@ fn zeroize(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
 }
 
 #[pyfunction]
-fn zeroize1(arr: &Bound<'_, PyAny>) -> PyResult<()> {
-    as_array_mut(arr)?.zeroize();
+fn zeroize1(arr: &Bound<'_, PyAny>, py: Python<'_>) -> PyResult<()> {
+    as_array_mut(arr, py)?.zeroize();
     Ok(())
 }
 
 #[pyfunction]
-fn mlock(arr: &Bound<'_, PyAny>) -> PyResult<()> {
+fn mlock(arr: &Bound<'_, PyAny>, py: Python<'_>) -> PyResult<()> {
+    let arr = as_array_mut(arr, py)?;
     unsafe {
-        let arr = as_array_mut(arr)?;
         if !_mlock(arr.as_mut_ptr(), arr.len()) {
             return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
                 "mlock failed",
@@ -35,9 +36,9 @@ fn mlock(arr: &Bound<'_, PyAny>) -> PyResult<()> {
 }
 
 #[pyfunction]
-fn munlock(arr: &Bound<'_, PyAny>) -> PyResult<()> {
+fn munlock(arr: &Bound<'_, PyAny>, py: Python<'_>) -> PyResult<()> {
+    let arr = as_array_mut(arr, py)?;
     unsafe {
-        let arr = as_array_mut(arr)?;
         if !_munlock(arr.as_mut_ptr(), arr.len()) {
             return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
                 "mlock failed",
@@ -47,60 +48,56 @@ fn munlock(arr: &Bound<'_, PyAny>) -> PyResult<()> {
     Ok(())
 }
 
-fn as_array_mut<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a mut [u8]> {
-    let arr = unsafe {
+fn as_array_mut<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a mut [u8]> {
+    let arr = {
         if let Ok(arr) = arr.downcast::<PyByteArray>() {
-            arr.as_bytes_mut()
+            unsafe { arr.as_bytes_mut() }
         } else if let Ok(arr) = arr.downcast::<PyArray1<u8>>() {
-            arr.as_slice_mut().unwrap()
+            unsafe { arr.as_slice_mut().unwrap() }
         } else {
-            return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-                "Expected a bytearray or numpy.array",
-            ));
+            let buffer: PyBuffer<u8> = PyBuffer::get_bound(arr)
+                .map_err(|err| PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+                    format!("expected a bytearray, bytes, array.array or numpy.array: {err}"),
+                ))?;
+            let ptr = buffer.buf_ptr() as *mut u8;
+            let len = buffer.as_slice(py).ok_or(
+                PyErr::new::<pyo3::exceptions::PyTypeError, _>("extracting len failed"))?.len();
+            let data_slice = unsafe { std::slice::from_raw_parts_mut(ptr, len) };
+            data_slice
         }
     };
     Ok(arr)
 }
 
 #[allow(dead_code)]
-fn as_array<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a [u8]> {
-    let arr = unsafe {
+fn as_array<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a [u8]> {
+    let arr = {
         if let Ok(arr) = arr.downcast::<PyByteArray>() {
-            arr.as_bytes()
+            unsafe { arr.as_bytes() }
         } else if let Ok(arr) = arr.downcast::<PyBytes>() {
             arr.as_bytes()
         } else if let Ok(arr) = arr.downcast::<PyArray1<u8>>() {
-            arr.as_slice().unwrap()
+            unsafe { arr.as_slice().unwrap() }
         } else {
-            return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-                "Expected a bytearray, bytes or numpy.array",
-            ));
+            let buffer: PyBuffer<u8> = PyBuffer::get_bound(arr)
+                .map_err(|err| PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+                    format!("expected a bytearray, bytes, array.array or numpy.array: {err}"),
+                ))?;
+            let ptr = buffer.buf_ptr() as *const u8;
+            let len = buffer.as_slice(py).ok_or(
+                PyErr::new::<pyo3::exceptions::PyTypeError, _>("extracting len failed"))?.len();
+            let data_slice = unsafe { std::slice::from_raw_parts(ptr, len) };
+            data_slice
         }
     };
     Ok(arr)
 }
 
-// #[pyfunction]
-// fn zeroize_mv<'py>(arr: &PyMemoryView, len: usize) -> PyResult<()> {
-//     // Get the buffer information
-//     let buffer = PyBuffer::<u8>::get(arr)?;
-//
-//     // Get the raw mutable pointer and length of the memory view
-//     let ptr = arr.as_ptr() as *mut u8;
-//
-//     // Create a mutable slice from the raw pointer and length
-//     let arr: &mut [u8] = unsafe { std::slice::from_raw_parts_mut(ptr, len) };
-//
-//     arr.zeroize();
-//
-//     Ok(())
-// }
-
 /// Calls the platform's underlying `mlock(2)` implementation.
 unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
     println!("mlock {len} bytes");
-    // memsec::mlock(ptr, len)
-    region::lock(ptr, len).is_ok()
+    memsec::mlock(ptr, len)
+    // region::lock(ptr, len).is_ok()
 }
 
 /// Calls the platform's underlying `munlock(2)` implementation.

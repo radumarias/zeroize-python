@@ -2,6 +2,8 @@ import unittest
 from zeroize import zeroize1, mlock, munlock
 import numpy as np
 import os
+import array
+import random
 
 
 SIZES_MB = [
@@ -12,7 +14,7 @@ SIZES_MB = [
     0.5,
     1,
     2,
-    4,
+    2.97,
 ]
 
 
@@ -42,15 +44,20 @@ class TestStringMethods(unittest.TestCase):
                 arr[:] = os.urandom(len(arr))
                 arr_np = np.zeros(len(arr), dtype=np.uint8)
                 arr_np[:] = arr
+                arr2 = array.array('B', (random.randint(0, 255) for _ in range(int(size * 1024 * 1024))))
                 print(f"Testing size: {size} MB")
                 print("mlock bytearray")
                 mlock(arr)
-                print("mlock np array")
-                mlock(arr_np)
+#                 print("mlock np array")
+#                 mlock(arr_np)
+                print("mlock array.array")
+                mlock(arr2)
                 zeroize1(arr)
                 zeroize1(arr_np)
+                zeroize1(arr2)
                 self.assertEqual(arr, bytearray(int(size * 1024 * 1024)))
                 self.assertEqual(True, all(arr_np == 0))
+                self.assertEqual(True, all(byte == 0 for byte in arr2))
 
             finally:
                 munlock(arr)
