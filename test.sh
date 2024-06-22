@@ -1,4 +1,4 @@
-#!/bin/hash
+#!/bin/bash
 
 set -e
 
