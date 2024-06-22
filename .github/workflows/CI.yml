@@ -127,12 +127,7 @@ jobs:
     - name: Run tests
       run: |
         .env\Scripts\activate
-        
-        pytest
-        if ($LASTEXITCODE) { exit $LASTEXITCODE }
-        
-        python examples/lock_and_zeroize.py
-        if ($LASTEXITCODE) { exit $LASTEXITCODE }
+        cmd /c tests.bat
 
   build_linux:
     needs: [test_rust, test_py_linux, test_py_macos, test_py_windows]
