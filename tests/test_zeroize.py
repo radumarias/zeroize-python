@@ -21,6 +21,7 @@ class TestStringMethods(unittest.TestCase):
         try:
             arr = bytearray(b"1234567890")
             arr_np = np.array([0] * 10, dtype=np.uint8)
+            arr_np[:]=arr
             mlock(arr)
             mlock(arr_np)
             zeroize1(arr)
@@ -37,11 +38,11 @@ class TestStringMethods(unittest.TestCase):
         for size in SIZES_MB:
             try:
                 arr = bytearray(int(size * 1024 * 1024))
-                arr_np = np.random.randint(
-                    0, 256, int(size), dtype=np.uint8
-                )
+                arr_np = np.zeros(int(size * 1024 * 1024), dtype=np.uint8)
                 print(f"Testing size: {size} MB")
+                print("mlock bytearray")
                 mlock(arr)
+                print("mlock np array")
                 mlock(arr_np)
                 zeroize1(arr)
                 zeroize1(arr_np)

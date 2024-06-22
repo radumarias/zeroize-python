@@ -1,4 +1,5 @@
 #![deny(warnings)]
+
 use numpy::{PyArray1, PyArrayMethods};
 use pyo3::prelude::*;
 use pyo3::types::{PyByteArray, PyBytes};
@@ -97,7 +98,9 @@ fn as_array<'a>(arr: &'a Bound<PyAny>) -> PyResult<&'a [u8]> {
 
 /// Calls the platform's underlying `mlock(2)` implementation.
 unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
-    memsec::mlock(ptr, len)
+    // memsec::mlock(ptr, len)
+    let r = region::lock(ptr, len).is_ok();
+    r
 }
 
 /// Calls the platform's underlying `munlock(2)` implementation.
@@ -119,24 +122,25 @@ mod test {
 
     #[test]
     fn test_mlock() {
-        let mut arr = [1, 2, 3, 4, 5];
-        let mut arr2 = vec![0; 4096];
-        let mut arr3 = vec![0; 4096 * 4096];
-        unsafe {
+        let sizes_mb = [
+            0.03125,
+            0.0625,
+            0.125,
+            0.25,
+            0.5,
+            1.0,
+            2.0,
+            4.0,
+        ];
+        for size in sizes_mb {
+            println!("Check for size {size} MB");
+            let mut arr = vec![0; (size * 1024.0 * 1024.0) as usize];
             let ptr = arr.as_mut_ptr();
             let len = arr.len();
-            _mlock(ptr, len);
-            _munlock(ptr, len);
-
-            let ptr = arr2.as_mut_ptr();
-            let len = arr2.len();
-            _mlock(ptr, len);
-            _munlock(ptr, len);
-
-            let ptr = arr3.as_mut_ptr();
-            let len = arr3.len();
-            _mlock(ptr, len);
-            _munlock(ptr, len);
+            unsafe {
+                _mlock(ptr, len);
+                _munlock(ptr, len);
+            }
         }
     }
 }
