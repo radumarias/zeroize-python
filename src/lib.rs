@@ -122,16 +122,7 @@ mod test {
 
     #[test]
     fn test_mlock() {
-        let sizes_mb = [
-            0.03125,
-            0.0625,
-            0.125,
-            0.25,
-            0.5,
-            1.0,
-            2.0,
-            4.0,
-        ];
+        let sizes_mb = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0];
         for size in sizes_mb {
             println!("Check for size {size} MB");
             let mut arr = vec![0; (size * 1024.0 * 1024.0) as usize];
