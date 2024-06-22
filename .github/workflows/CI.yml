@@ -127,8 +127,10 @@ jobs:
     - name: Run tests
       run: |
         .env\Scripts\activate
-        pytest || exit /b
-        python examples/lock_and_zeroize.py || exit /b
+        pytest
+        if %errorlevel% neq 0 exit /b %errorlevel%
+        python examples/lock_and_zeroize.py
+        if %errorlevel% neq 0 exit /b %errorlevel%
 
   build_linux:
     needs: [test_rust, test_py_linux, test_py_macos, test_py_windows]
