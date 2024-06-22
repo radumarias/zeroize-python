@@ -55,13 +55,18 @@ fn as_array_mut<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a mut [
         } else if let Ok(arr) = arr.downcast::<PyArray1<u8>>() {
             unsafe { arr.as_slice_mut().unwrap() }
         } else {
-            let buffer: PyBuffer<u8> = PyBuffer::get_bound(arr)
-                .map_err(|err| PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-                    format!("expected a bytearray, bytes, array.array or numpy.array: {err}"),
-                ))?;
+            let buffer: PyBuffer<u8> = PyBuffer::get_bound(arr).map_err(|err| {
+                PyErr::new::<pyo3::exceptions::PyTypeError, _>(format!(
+                    "expected a bytearray, bytes, array.array or numpy.array: {err}"
+                ))
+            })?;
             let ptr = buffer.buf_ptr() as *mut u8;
-            let len = buffer.as_slice(py).ok_or(
-                PyErr::new::<pyo3::exceptions::PyTypeError, _>("extracting len failed"))?.len();
+            let len = buffer
+                .as_slice(py)
+                .ok_or(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+                    "extracting len failed",
+                ))?
+                .len();
             let data_slice = unsafe { std::slice::from_raw_parts_mut(ptr, len) };
             data_slice
         }
@@ -79,13 +84,18 @@ fn as_array<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a [u8]> {
         } else if let Ok(arr) = arr.downcast::<PyArray1<u8>>() {
             unsafe { arr.as_slice().unwrap() }
         } else {
-            let buffer: PyBuffer<u8> = PyBuffer::get_bound(arr)
-                .map_err(|err| PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-                    format!("expected a bytearray, bytes, array.array or numpy.array: {err}"),
-                ))?;
+            let buffer: PyBuffer<u8> = PyBuffer::get_bound(arr).map_err(|err| {
+                PyErr::new::<pyo3::exceptions::PyTypeError, _>(format!(
+                    "expected a bytearray, bytes, array.array or numpy.array: {err}"
+                ))
+            })?;
             let ptr = buffer.buf_ptr() as *const u8;
-            let len = buffer.as_slice(py).ok_or(
-                PyErr::new::<pyo3::exceptions::PyTypeError, _>("extracting len failed"))?.len();
+            let len = buffer
+                .as_slice(py)
+                .ok_or(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+                    "extracting len failed",
+                ))?
+                .len();
             let data_slice = unsafe { std::slice::from_raw_parts(ptr, len) };
             data_slice
         }
