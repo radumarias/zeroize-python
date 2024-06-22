@@ -75,7 +75,8 @@ class TestStringMethods(unittest.TestCase):
                 self.assertEqual(True, all(byte == 0 for byte in arr2))
 
             finally:
-                munlock(arr)
+                print("f")
+#                 munlock(arr)
 
 
 if __name__ == "__main__":
