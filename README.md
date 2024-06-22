@@ -133,6 +133,7 @@ python -m venv .env
 source .env/bin/activate
 pip install -r requirements.txt
 maturin develop
+pytest
 python examples/lock_and_zeroize.py
 python examples/zeroize_before_fork.py
 ```
