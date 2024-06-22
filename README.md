@@ -21,8 +21,6 @@ It can work with `bytearray` and `numpy array`.
 ## Lock and zeroize memory
 
 ```python
-"""By itself it doesn't work if memory is moved or moved to swap. You can use `crypes` with `libc.mlock()` to lock the memory"""
-
 from zeroize import zeroize1, mlock, munlock
 import numpy as np
 
