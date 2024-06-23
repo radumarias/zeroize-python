@@ -105,11 +105,11 @@ class TestStringMethods(unittest.TestCase):
                 address2, size2 = arr2.buffer_info()
                 size2 = size2 * arr2.itemsize
 
-                print("lock arr")
-                mlock(arr)
+#                 print("lock arr")
+#                 mlock(arr)
 #                 lock_memory(address, size)
-                print("lock arr2")
-                mlock(arr2)
+#                 print("lock arr2")
+#                 mlock(arr2)
                 print("lock np")
                 mlock(arr_np)
 #                 lock_memory(address2, size2)
