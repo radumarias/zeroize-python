@@ -24,7 +24,7 @@ SetProcessWorkingSetSize.argtypes = [wintypes.HANDLE, ctypes.c_size_t, ctypes.c_
 current_process = GetCurrentProcess()
 
 # Set the working set size
-min_size = 256 * 1024  # Minimum working set size (e.g., 256KB)
+min_size = 6 * 1024 * 1024  # Minimum working set size (e.g., 256KB)
 max_size = 10 * 1024 * 1024  # Maximum working set size (e.g., 1024KB)
 
 result = SetProcessWorkingSetSize(current_process, min_size, max_size)
