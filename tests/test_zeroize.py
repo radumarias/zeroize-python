@@ -15,10 +15,18 @@ def lock_memory(address, size):
         # On Linux, use mlock
         libc = ctypes.CDLL('libc.so.6')
         if libc.mlock(address, size) != 0:
-            raise RuntimeError("Failed to lock memory")
+            raise RuntimeError(f"Failed to lock memory. Error code: {ctypes.get_errno()}")
     elif platform.system() == 'Windows':
         # On Windows, use VirtualLock
-        if not ctypes.windll.kernel32.VirtualLock(address, size):
+        VirtualLock = ctypes.windll.kernel32.VirtualLock
+        VirtualLock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+        VirtualLock.restype = ctypes.c_bool
+
+        VirtualUnlock = ctypes.windll.kernel32.VirtualUnlock
+        VirtualUnlock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+        VirtualUnlock.restype = ctypes.c_bool
+
+        if not VirtualLock(address, size):
             raise RuntimeError("Failed to lock memory")
     else:
         raise NotImplementedError(f"Unsupported platform: {platform.system()}")
@@ -28,10 +36,18 @@ def unlock_memory(address, size):
         # On Linux, use munlock
         libc = ctypes.CDLL('libc.so.6')
         if libc.munlock(address, size) != 0:
-            raise RuntimeError("Failed to unlock memory")
+            raise RuntimeError(f"Failed to unlock memory. Error code: {ctypes.get_errno()}")
     elif platform.system() == 'Windows':
         # On Windows, use VirtualUnlock
-        if not ctypes.windll.kernel32.VirtualUnlock(address, size):
+        VirtualLock = ctypes.windll.kernel32.VirtualLock
+        VirtualLock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+        VirtualLock.restype = ctypes.c_bool
+
+        VirtualUnlock = ctypes.windll.kernel32.VirtualUnlock
+        VirtualUnlock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+        VirtualUnlock.restype = ctypes.c_bool
+
+        if not VirtualUnlock(address, size):
             raise RuntimeError("Failed to unlock memory")
     else:
         raise NotImplementedError(f"Unsupported platform: {platform.system()}")
@@ -88,10 +104,11 @@ class TestStringMethods(unittest.TestCase):
                 address = (ctypes.c_char * len(arr)).from_buffer(arr)
                 size = len(arr)
 
-                address2 = arr2.buffer_info()[0]
-                size2 = arr2.buffer_info()[1] * arr2.itemsize
-                print("address2 {address2}")
-                print("size2 {size2}")
+                address, length = arr2.buffer_info()
+                length = length * arr2.itemsize
+
+                print(f"Pointer to the first element: {address}")
+                print(f"Length of the array: {length}")
 
                 print("lock arr")
                 lock_memory(address, size)
