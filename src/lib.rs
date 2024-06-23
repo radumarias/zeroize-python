@@ -39,7 +39,7 @@ fn munlock(arr: &Bound<'_, PyAny>, py: Python<'_>) -> PyResult<()> {
     unsafe {
         if !_munlock(arr.as_mut_ptr(), arr.len()) {
             return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-                "mlock failed",
+                "munlock failed",
             ));
         }
     }
@@ -103,11 +103,13 @@ fn as_array<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a [u8]> {
 
 /// Calls the platform's underlying `mlock(2)` implementation.
 unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
+    println!("mlock len {len}");
     memsec::mlock(ptr, len)
 }
 
 /// Calls the platform's underlying `munlock(2)` implementation.
 unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
+    println!("munlock len {len}");
     memsec::munlock(ptr, len)
 }
 
