@@ -68,7 +68,7 @@ for size in SIZES_MB:
         zeroize1(arr)
         zeroize1(arr_np)
         zeroize1(array_array)
-        assert arr = bytearray(int(size * 1024 * 1024))
+        assert arr == bytearray(int(size * 1024 * 1024))
         assert all(arr_np == 0)
         assert all(byte == 0 for byte in array_array)
 
