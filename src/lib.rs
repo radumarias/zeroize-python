@@ -1,12 +1,13 @@
 #![deny(warnings)]
 
+use std::any::Any;
 use numpy::{PyArray1, PyArrayMethods};
 use pyo3::buffer::PyBuffer;
 use pyo3::prelude::*;
 use pyo3::types::{PyByteArray, PyBytes};
 use zeroize_rs::Zeroize;
 
-const PAGE_SIZE: usize = 4096_usize;
+const PAGE_SIZE: usize = 16_usize;
 
 /// A Python module implemented in Rust.
 #[pymodule]
