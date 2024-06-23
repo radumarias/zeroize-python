@@ -91,7 +91,6 @@ class TestStringMethods(unittest.TestCase):
 
             finally:
                 munlock(arr)
-                munlock(arr)
                 munlock(arr_np)
 
 
