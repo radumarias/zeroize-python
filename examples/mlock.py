@@ -20,7 +20,8 @@ SIZES_MB = [
     0.25,
     0.5,
     1,
-    1.6,
+    2,
+    4
 ]
 
 for size in SIZES_MB:
