@@ -108,6 +108,7 @@ unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
 
 /// Calls the platform's underlying `munlock(2)` implementation.
 unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
+    println!("munlock len {len}");
     memsec::munlock(ptr, len)
 }
 
