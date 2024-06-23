@@ -1,6 +1,4 @@
 #![deny(warnings)]
-
-use std::any::Any;
 use numpy::{PyArray1, PyArrayMethods};
 use pyo3::buffer::PyBuffer;
 use pyo3::prelude::*;
