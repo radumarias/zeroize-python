@@ -38,8 +38,6 @@ if is_windows:
         error_message = ctypes.FormatError(error_code)
         raise RuntimeError(f"SetProcessWorkingSetSize failed with error code {error_code}: {error_message}")
 
-raise RuntimeError("test")
-
 SIZES_MB = [
     0.03125,
     0.0625,
@@ -77,24 +75,26 @@ class TestStringMethods(unittest.TestCase):
                 arr[:] = os.urandom(len(arr))
                 arr_np = np.zeros(len(arr), dtype=np.uint8)
                 arr_np[:] = arr
-                arr2 = array.array('B', (random.randint(0, 255) for _ in range(int(size * 1024 * 1024))))
+                array_array = array.array('B', (random.randint(0, 255) for _ in range(int(size * 1024 * 1024))))
                 print(f"Testing size: {size} MB")
                 print("mlock bytearray")
                 mlock(arr)
                 print("mlock np array")
                 mlock(arr_np)
                 print("mlock array.array")
-                mlock(arr2)
+                mlock(array_array)
 
                 zeroize1(arr)
                 zeroize1(arr_np)
-                zeroize1(arr2)
+                zeroize1(array_array)
                 self.assertEqual(arr, bytearray(int(size * 1024 * 1024)))
                 self.assertEqual(True, all(arr_np == 0))
-                self.assertEqual(True, all(byte == 0 for byte in arr2))
+                self.assertEqual(True, all(byte == 0 for byte in array_array))
 
             finally:
                 munlock(arr)
+                munlock(arr_np)
+                munlock(array_array)
 
 
 if __name__ == "__main__":

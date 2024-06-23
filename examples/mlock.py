@@ -1,40 +1,37 @@
 import numpy as np
-import ctypes
-from ctypes import wintypes
+import platform
 
-# Define the Windows API functions
-kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
 
-VirtualLock = kernel32.VirtualLock
-VirtualLock.restype = wintypes.BOOL
-VirtualLock.argtypes = [wintypes.LPVOID, ctypes.c_size_t]
+def is_windows():
+    return platform.system() == "Windows"
 
-VirtualUnlock = kernel32.VirtualUnlock
-VirtualUnlock.restype = wintypes.BOOL
-VirtualUnlock.argtypes = [wintypes.LPVOID, ctypes.c_size_t]
+if is_windows:
+    import ctypes
+    from ctypes import wintypes
 
-GetCurrentProcess = kernel32.GetCurrentProcess
-GetCurrentProcess.restype = wintypes.HANDLE
+    # Define the Windows API functions
+    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
 
-SetProcessWorkingSetSize = kernel32.SetProcessWorkingSetSize
-SetProcessWorkingSetSize.restype = wintypes.BOOL
-SetProcessWorkingSetSize.argtypes = [wintypes.HANDLE, ctypes.c_size_t, ctypes.c_size_t]
+    GetCurrentProcess = kernel32.GetCurrentProcess
+    GetCurrentProcess.restype = wintypes.HANDLE
 
-# Get the handle of the current process
-current_process = GetCurrentProcess()
+    SetProcessWorkingSetSize = kernel32.SetProcessWorkingSetSize
+    SetProcessWorkingSetSize.restype = wintypes.BOOL
+    SetProcessWorkingSetSize.argtypes = [wintypes.HANDLE, ctypes.c_size_t, ctypes.c_size_t]
 
-# Set the working set size
-min_size = 6 * 1024 * 1024  # Minimum working set size (e.g., 256KB)
-max_size = 10 * 1024 * 1024  # Maximum working set size (e.g., 1024KB)
+    # Get the handle of the current process
+    current_process = GetCurrentProcess()
 
-result = SetProcessWorkingSetSize(current_process, min_size, max_size)
+    # Set the working set size
+    min_size = 6 * 1024 * 1024  # Minimum working set size
+    max_size = 10 * 1024 * 1024  # Maximum working set size
 
-if not result:
-    error_code = ctypes.get_last_error()
-    error_message = ctypes.FormatError(error_code)
-    print(f"SetProcessWorkingSetSize failed with error code {error_code}: {error_message}")
-else:
-    print("SetProcessWorkingSetSize succeeded.")
+    result = SetProcessWorkingSetSize(current_process, min_size, max_size)
+
+    if not result:
+        error_code = ctypes.get_last_error()
+        error_message = ctypes.FormatError(error_code)
+        raise RuntimeError(f"SetProcessWorkingSetSize failed with error code {error_code}: {error_message}")
 
 SIZES_MB = [
     0.03125,
@@ -48,20 +45,28 @@ SIZES_MB = [
 ]
 
 for size in SIZES_MB:
-    print(f"size {size}")
-    array_size = int(size * 1024 * 1024)
-    array = np.zeros(array_size, dtype=np.uint8)  # Initialize array with zeros
+    try:
+        arr = bytearray(int(size * 1024 * 1024))
+        arr[:] = os.urandom(len(arr))
+        arr_np = np.zeros(len(arr), dtype=np.uint8)
+        arr_np[:] = arr
+        array_array = array.array('B', (random.randint(0, 255) for _ in range(int(size * 1024 * 1024))))
+        print(f"Testing size: {size} MB")
+        print("mlock bytearray")
+        mlock(arr)
+        print("mlock np array")
+        mlock(arr_np)
+        print("mlock array.array")
+        mlock(array_array)
 
-    # Lock the memory associated with the array
-    addr = array.ctypes.data
-    size = array.nbytes
+        zeroize1(arr)
+        zeroize1(arr_np)
+        zeroize1(array_array)
+        self.assertEqual(arr, bytearray(int(size * 1024 * 1024)))
+        self.assertEqual(True, all(arr_np == 0))
+        self.assertEqual(True, all(byte == 0 for byte in array_array))
 
-    if not VirtualLock(ctypes.c_void_p(addr), ctypes.c_size_t(size)):
-        error_code = ctypes.get_last_error()
-        error_message = ctypes.FormatError(error_code)
-        print(f"VirtualLock failed with error code {error_code}: {error_message}")
-
-    if not VirtualUnlock(ctypes.c_void_p(addr), ctypes.c_size_t(size)):
-        error_code = ctypes.get_last_error()
-        error_message = ctypes.FormatError(error_code)
-        print(f"VirtualUnlock failed with error code {error_code}: {error_message}")
+    finally:
+        munlock(arr)
+        munlock(arr_np)
+        munlock(array_array)
