@@ -113,7 +113,6 @@ unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
         }
     }
     true
-    // region::lock(ptr, len).is_ok()
 }
 
 /// Calls the platform's underlying `munlock(2)` implementation.

@@ -13,8 +13,6 @@ pyo3 = "0.21.2"
 zeroize_rs = { version = "1.8.1", package = "zeroize"}
 numpy = "0.21"
 memsec = "0.7.0"
-region = "3.0.2"
-memsecurity = {  version = "3.5.2", features = ["encryption"]}
 
 [profile.release]
 panic = "abort"
