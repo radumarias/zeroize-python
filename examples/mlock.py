@@ -13,8 +13,10 @@ VirtualUnlock = kernel32.VirtualUnlock
 VirtualUnlock.restype = wintypes.BOOL
 VirtualUnlock.argtypes = [wintypes.LPVOID, ctypes.c_size_t]
 
-# Create a numpy array
-array = np.random.rand(1000000)  # Example: 1 million double-precision floats
+# Allocate a 64KB array of unsigned 8-bit integers
+size_kb = 64
+array_size = size_kb * 1024  # 64KB
+array = np.zeros(array_size, dtype=np.uint8)  # Initialize array with zeros
 
 # Lock the memory associated with the array
 addr = array.ctypes.data
