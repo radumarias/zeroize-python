@@ -90,6 +90,8 @@ class TestStringMethods(unittest.TestCase):
 
                 address2 = arr2.buffer_info()[0]
                 size2 = arr2.buffer_info()[1] * arr2.itemsize
+                print("address2 {address2}")
+                print("size2 {size2}")
 
                 print("lock arr")
                 lock_memory(address, size)
