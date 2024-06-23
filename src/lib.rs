@@ -113,6 +113,9 @@ unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
     for page in 1..=page_count {
         let len2 = if page < page_count { PAGE_SIZE } else { len % PAGE_SIZE };
         println!("page {page} len {len2}");
+        if len2 == 0 {
+            break;
+        }
         if !memsec::mlock(ptr.add((page - 1) * PAGE_SIZE), len2) {
             return false;
         }
@@ -128,6 +131,9 @@ unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
     let page_count = len / PAGE_SIZE + 1;
     for page in 1..=page_count {
         let len2 = if page < page_count { PAGE_SIZE } else { len % PAGE_SIZE };
+        if len2 == 0 {
+            break;
+        }
         if !memsec::munlock(ptr.add((page - 1) * PAGE_SIZE), len2) {
             return false;
         }
