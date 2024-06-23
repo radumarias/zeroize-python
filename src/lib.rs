@@ -10,7 +10,6 @@ use zeroize_rs::Zeroize;
 #[pymodule]
 fn zeroize(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(zeroize1, m)?)?;
-    // m.add_function(wrap_pyfunction!(zeroize_mv, m)?)?;
     m.add_function(wrap_pyfunction!(mlock, m)?)?;
     m.add_function(wrap_pyfunction!(munlock, m)?)?;
     Ok(())
@@ -32,9 +31,6 @@ fn mlock(arr: &Bound<'_, PyAny>, py: Python<'_>) -> PyResult<()> {
             ));
         }
     }
-    // sodiumoxide::utils::mlock(arr).map_err(|_|PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-    //     "mlock failed",
-    // ))?;
     Ok(())
 }
 
