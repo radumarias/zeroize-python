@@ -5,7 +5,7 @@ import platform
 def is_windows():
     return platform.system() == "Windows"
 
-if is_windows:
+if is_windows():
     import ctypes
     from ctypes import wintypes
 
