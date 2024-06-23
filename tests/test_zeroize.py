@@ -4,9 +4,39 @@ import numpy as np
 import os
 import array
 import random
-import ctypes
-from ctypes import wintypes
+import platform
 
+
+def is_windows():
+    return platform.system() == "Windows"
+
+if is_windows:
+    import ctypes
+    from ctypes import wintypes
+
+    # Define the Windows API functions
+    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+
+    GetCurrentProcess = kernel32.GetCurrentProcess
+    GetCurrentProcess.restype = wintypes.HANDLE
+
+    SetProcessWorkingSetSize = kernel32.SetProcessWorkingSetSize
+    SetProcessWorkingSetSize.restype = wintypes.BOOL
+    SetProcessWorkingSetSize.argtypes = [wintypes.HANDLE, ctypes.c_size_t, ctypes.c_size_t]
+
+    # Get the handle of the current process
+    current_process = GetCurrentProcess()
+
+    # Set the working set size
+    min_size = 6 * 1024 * 1024  # Minimum working set size
+    max_size = 10 * 1024 * 1024  # Maximum working set size
+
+    result = SetProcessWorkingSetSize(current_process, min_size, max_size)
+
+    if not result:
+        error_code = ctypes.get_last_error()
+        error_message = ctypes.FormatError(error_code)
+        raise RuntimeError(f"SetProcessWorkingSetSize failed with error code {error_code}: {error_message}")
 
 SIZES_MB = [
     0.03125,
