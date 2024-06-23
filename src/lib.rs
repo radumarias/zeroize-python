@@ -106,9 +106,10 @@ fn as_array<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a [u8]> {
 
 /// Calls the platform's underlying `mlock(2)` implementation.
 unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
-    for page in 1..=len / PAGE_SIZE {
-        let len2 = len % page * PAGE_SIZE;
-        if !memsec::mlock(ptr, len2) {
+    for page in 0..len / PAGE_SIZE {
+        let len2 = len % (page + 1) * PAGE_SIZE;
+        println!("len2 {len2}");
+        if !memsec::mlock(ptr.add(page * PAGE_SIZE), len2) {
             return false;
         }
     }
@@ -117,8 +118,8 @@ unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
 
 /// Calls the platform's underlying `munlock(2)` implementation.
 unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
-    for page in 1..=len / PAGE_SIZE {
-        let len2 = len % page * PAGE_SIZE;
+    for page in 0..len / PAGE_SIZE {
+        let len2 = len % (page + 1) * PAGE_SIZE;
         if !memsec::munlock(ptr, len2) {
             return false;
         }
