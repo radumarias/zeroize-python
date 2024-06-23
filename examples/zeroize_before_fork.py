@@ -6,7 +6,7 @@ from zeroize import zeroize1, mlock, munlock
 
 if __name__ == "__main__":
     try:
-        # Maximum you can mlock is 4MB
+        # Maximum you can mlock is 2662 KB
         sensitive_data = bytearray(b"Sensitive Information")
         mlock(sensitive_data)
 

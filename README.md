@@ -5,7 +5,7 @@
 
 Securely clear secrets from memory. Built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler.
 
-It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood to zeroize and [memsec](https://crates.io/crates/memsec) for `mlock()` and `munlock()`. **Maximum you can mlock is 4MB**.  
+It uses [zeroize](https://crates.io/crates/zeroize) crate under the hood to zeroize and [memsec](https://crates.io/crates/memsec) for `mlock()` and `munlock()`. **Maximum you can mlock is 2662 KB**.  
 It can work with `bytearray` and `numpy array`.
 
 > [!WARNING]  
@@ -14,9 +14,12 @@ It can work with `bytearray` and `numpy array`.
 
 # Caveats of `mlock()`
 
-`mlock` works on pages, so 2 variables could reside in the same page and if you `munlock` one it will `munlock` the whole page and also the memory for the other variable. Ideally you could `munlock` all your vars at same time so it would not be affected by the overlap. One strategy could be to expire your vars that store credentials when not used and to reload them again when needed. Like that you could `mlock` when you load them and `munlock` on expire and keep all vars under the same expire policy. Like this all var will be `munlock`ed at the same time.
+`mlock` works on pages, so 2 variables could reside in the same page and if you `munlock` one it will `munlock` the whole page and also the memory for the other variable.
+ Ideally you could `munlock` all your vars at same time so it would not be affected by the overlap. One strategy could be to expire your vars that store credentials when not used and to reload them again when needed. Like that you could `mlock` when you load them and `munlock` on expire and keep all vars under the same expire policy. Like this all var will be `munlock`ed at the same time.
 
 # Examples
+
+**On Windows you can mlock up to 128 KB by default. If you need more you need to first call `SetProcessWorkingSetSize` to increase the `dwMinimumWorkingSetSize`. Will have an example below.**
 
 ## Lock and zeroize memory
 
@@ -30,11 +33,11 @@ if __name__ == "__main__":
         print("allocate memory")
 
         # regular array
-        # Maximum you can mlock is 4MB
+        # Maximum you can mlock is 2662 KB
         arr = bytearray(b"1234567890")
 
         # numpy array
-        # Maximum you can mlock is 4MB
+        # Maximum you can mlock is 2662 KB
         arr_np = np.array([0] * 10, dtype=np.uint8)
         arr_np[:] = arr
         assert arr_np.tobytes() == b"1234567890"
@@ -72,7 +75,7 @@ from zeroize import zeroize1, mlock, munlock
 
 if __name__ == "__main__":
     try:
-        # Maximum you can mlock is 4MB
+        # Maximum you can mlock is 2662 KB
         sensitive_data = bytearray(b"Sensitive Information")
         mlock(sensitive_data)
 
@@ -96,6 +99,51 @@ if __name__ == "__main__":
         # Unlock the memory
         print("unlocking memory")
         munlock(sensitive_data)
+```
+
+# Locking more than 128 KB
+
+On Windows if you need to `mlock` more than `128 KB` you need to first call `SetProcessWorkingSetSize` to increase the `dwMinimumWorkingSetSize`.
+
+Here is an example, set `min_size` to the size you want to `mlock` + some overhead.
+
+```python
+import platform
+
+
+def setup_memory_limit():
+    if not platform.system() == "Windows":
+        return
+
+    import ctypes
+    from ctypes import wintypes
+
+    # Define the Windows API functions
+    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+
+    GetCurrentProcess = kernel32.GetCurrentProcess
+    GetCurrentProcess.restype = wintypes.HANDLE
+
+    SetProcessWorkingSetSize = kernel32.SetProcessWorkingSetSize
+    SetProcessWorkingSetSize.restype = wintypes.BOOL
+    SetProcessWorkingSetSize.argtypes = [wintypes.HANDLE, ctypes.c_size_t, ctypes.c_size_t]
+
+    # Get the handle of the current process
+    current_process = GetCurrentProcess()
+
+    # Set the working set size
+    min_size = 6 * 1024 * 1024  # Minimum working set size
+    max_size = 10 * 1024 * 1024  # Maximum working set size
+
+    result = SetProcessWorkingSetSize(current_process, min_size, max_size)
+
+    if not result:
+        error_code = ctypes.get_last_error()
+        error_message = ctypes.FormatError(error_code)
+        raise RuntimeError(f"SetProcessWorkingSetSize failed with error code {error_code}: {error_message}")
+
+# Call this before you mlock
+setup_memory_limit()
 ```
 
 # Build from source
