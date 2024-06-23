@@ -2,6 +2,7 @@ import numpy as np
 import array
 import platform
 import random
+import os
 from zeroize import zeroize1, mlock, munlock
 
 
