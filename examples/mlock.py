@@ -56,9 +56,7 @@ for size in SIZES_MB:
         arr_np = np.zeros(len(arr), dtype=np.uint8)
         arr_np[:] = arr
         print(f"Testing size: {size} MB")
-        print("mlock bytearray")
         mlock(arr)
-        print("mlock np array")
         mlock(arr_np)
 
         zeroize1(arr)
