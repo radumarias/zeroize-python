@@ -24,16 +24,16 @@ fn zeroize1(arr: &Bound<'_, PyAny>, py: Python<'_>) -> PyResult<()> {
 #[pyfunction]
 fn mlock(arr: &Bound<'_, PyAny>, py: Python<'_>) -> PyResult<()> {
     let arr = as_array_mut(arr, py)?;
-    unsafe {
-        if !_mlock(arr.as_mut_ptr(), arr.len()) {
-            return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-                "mlock failed",
-            ));
-        }
-    }
-    // sodiumoxide::utils::mlock(arr).map_err(|_|PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-    //     "mlock failed",
-    // ))?;
+    // unsafe {
+    //     if !_mlock(arr.as_mut_ptr(), arr.len()) {
+    //         return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+    //             "mlock failed",
+    //         ));
+    //     }
+    // }
+    sodiumoxide::utils::mlock(arr).map_err(|_|PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+        "mlock failed",
+    ))?;
     Ok(())
 }
 
