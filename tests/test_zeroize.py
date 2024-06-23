@@ -105,7 +105,7 @@ class TestStringMethods(unittest.TestCase):
                 size = len(arr)
 
                 address2, size2 = arr2.buffer_info()
-                size2 = length * arr2.itemsize
+                size2 = size2 * arr2.itemsize
 
                 print(f"Pointer to the first element: {address2}")
                 print(f"Length of the array: {size2}")
