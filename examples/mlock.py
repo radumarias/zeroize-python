@@ -2,10 +2,10 @@ import numpy as np
 import platform
 
 
-def is_windows():
-    return platform.system() == "Windows"
+def setup_memory_limit():
+    if not platform.system() == "Windows":
+        return
 
-if is_windows():
     import ctypes
     from ctypes import wintypes
 
@@ -33,6 +33,8 @@ if is_windows():
         error_message = ctypes.FormatError(error_code)
         raise RuntimeError(f"SetProcessWorkingSetSize failed with error code {error_code}: {error_message}")
 
+setup_memory_limit()
+
 SIZES_MB = [
     0.03125,
     0.0625,
@@ -41,7 +43,7 @@ SIZES_MB = [
     0.5,
     1,
     2,
-    4
+    2.6
 ]
 
 for size in SIZES_MB:

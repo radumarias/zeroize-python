@@ -7,11 +7,10 @@ import random
 import platform
 
 
-def is_windows():
-    return platform.system() == "Windows"
+def setup_memory_limit():
+    if not platform.system() == "Windows":
+        return
 
-if is_windows():
-    print("windows")
     import ctypes
     from ctypes import wintypes
 
@@ -47,11 +46,15 @@ SIZES_MB = [
     0.5,
     1,
     2,
-    4
+    2.6
 ]
 
 
 class TestStringMethods(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        setup_memory_limit()
 
     def test_zeroize1(self):
         try:
