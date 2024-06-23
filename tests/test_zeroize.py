@@ -11,6 +11,7 @@ def is_windows():
     return platform.system() == "Windows"
 
 if is_windows:
+    print("windows")
     import ctypes
     from ctypes import wintypes
 
@@ -45,7 +46,8 @@ SIZES_MB = [
     0.25,
     0.5,
     1,
-    1.6,
+    2,
+    4
 ]
 
 
