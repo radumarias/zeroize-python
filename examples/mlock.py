@@ -14,7 +14,7 @@ VirtualUnlock.restype = wintypes.BOOL
 VirtualUnlock.argtypes = [wintypes.LPVOID, ctypes.c_size_t]
 
 # Allocate a 64KB array of unsigned 8-bit integers
-size_kb = 64
+size_kb = 128
 array_size = size_kb * 1024  # 64KB
 array = np.zeros(array_size, dtype=np.uint8)  # Initialize array with zeros
 
