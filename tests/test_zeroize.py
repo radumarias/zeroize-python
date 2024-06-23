@@ -38,6 +38,8 @@ if is_windows:
         error_message = ctypes.FormatError(error_code)
         raise RuntimeError(f"SetProcessWorkingSetSize failed with error code {error_code}: {error_message}")
 
+raise RuntimeError("test")
+
 SIZES_MB = [
     0.03125,
     0.0625,
