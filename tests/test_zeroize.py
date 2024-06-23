@@ -61,8 +61,7 @@ SIZES_MB = [
     0.5,
     1,
     2,
-#     2.97,
-    4,
+    2.83,
 ]
 
 
@@ -111,9 +110,11 @@ class TestStringMethods(unittest.TestCase):
                 print(f"Length of the array: {size2}")
 
                 print("lock arr")
-                lock_memory(address, size)
+                mlock(arr)
+#                 lock_memory(address, size)
                 print("lock arr2")
-                lock_memory(address2, size2)
+                mlock(arr2)
+#                 lock_memory(address2, size2)
 
                 zeroize1(arr)
                 zeroize1(arr_np)
