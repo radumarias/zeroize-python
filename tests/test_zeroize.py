@@ -105,9 +105,6 @@ class TestStringMethods(unittest.TestCase):
                 address2, size2 = arr2.buffer_info()
                 size2 = size2 * arr2.itemsize
 
-                print(f"Pointer to the first element: {address2}")
-                print(f"Length of the array: {size2}")
-
                 print("lock arr")
                 mlock(arr)
 #                 lock_memory(address, size)
