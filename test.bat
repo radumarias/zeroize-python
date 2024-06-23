@@ -1,3 +1,6 @@
+python examples/mlock.py
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
 pytest
 if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
