@@ -120,7 +120,7 @@ unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
 unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
     for page in 0..len / PAGE_SIZE {
         let len2 = len % (page + 1) * PAGE_SIZE;
-        if !memsec::munlock(ptr, len2) {
+        if !memsec::munlock(ptr.add(page * PAGE_SIZE), len2) {
             return false;
         }
     }
