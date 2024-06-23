@@ -5,8 +5,6 @@ use pyo3::prelude::*;
 use pyo3::types::{PyByteArray, PyBytes};
 use zeroize_rs::Zeroize;
 
-const PAGE_SIZE: usize = 1024_usize;
-
 /// A Python module implemented in Rust.
 #[pymodule]
 fn zeroize(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -105,39 +103,12 @@ fn as_array<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a [u8]> {
 
 /// Calls the platform's underlying `mlock(2)` implementation.
 unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
-    if len == 0 {
-        return true;
-    }
-    let page_count = len / PAGE_SIZE + 1;
-    for page in 1..=page_count {
-        let len2 = if page < page_count { PAGE_SIZE } else { len % PAGE_SIZE };
-        println!("page {page} len {len2}");
-        if len2 == 0 {
-            break;
-        }
-        if !memsec::mlock(ptr.add((page - 1) * PAGE_SIZE), len2) {
-            return false;
-        }
-    }
-    true
+    memsec::mlock(ptr, len)
 }
 
 /// Calls the platform's underlying `munlock(2)` implementation.
 unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
-    if len == 0 {
-        return true;
-    }
-    let page_count = len / PAGE_SIZE + 1;
-    for page in 1..=page_count {
-        let len2 = if page < page_count { PAGE_SIZE } else { len % PAGE_SIZE };
-        if len2 == 0 {
-            break;
-        }
-        if !memsec::munlock(ptr.add((page - 1) * PAGE_SIZE), len2) {
-            return false;
-        }
-    }
-    true
+    memsec::munlock(ptr, len)
 }
 
 #[cfg(test)]
