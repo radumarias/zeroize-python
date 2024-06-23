@@ -1,5 +1,8 @@
 import numpy as np
+import array
 import platform
+import random
+from zeroize import zeroize1, mlock, munlock
 
 
 def setup_memory_limit():
