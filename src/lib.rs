@@ -6,6 +6,8 @@ use pyo3::prelude::*;
 use pyo3::types::{PyByteArray, PyBytes};
 use zeroize_rs::Zeroize;
 
+const PAGE_SIZE: usize = 4096_usize;
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn zeroize(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -104,13 +106,25 @@ fn as_array<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a [u8]> {
 
 /// Calls the platform's underlying `mlock(2)` implementation.
 unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
-    // memsec::mlock(ptr, len)
-    region::lock(ptr, len).is_ok()
+    for page in 1..=len / PAGE_SIZE {
+        let len2 = len % page * PAGE_SIZE;
+        if !memsec::mlock(ptr, len2) {
+            return false;
+        }
+    }
+    true
+    // region::lock(ptr, len).is_ok()
 }
 
 /// Calls the platform's underlying `munlock(2)` implementation.
 unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
-    memsec::munlock(ptr, len)
+    for page in 1..=len / PAGE_SIZE {
+        let len2 = len % page * PAGE_SIZE;
+        if !memsec::munlock(ptr, len2) {
+            return false;
+        }
+    }
+    true
 }
 
 #[cfg(test)]
