@@ -24,16 +24,13 @@ fn zeroize1(arr: &Bound<'_, PyAny>, py: Python<'_>) -> PyResult<()> {
 #[pyfunction]
 fn mlock(arr: &Bound<'_, PyAny>, py: Python<'_>) -> PyResult<()> {
     let arr = as_array_mut(arr, py)?;
-    // unsafe {
-    //     if !_mlock(arr.as_mut_ptr(), arr.len()) {
-    //         return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-    //             "mlock failed",
-    //         ));
-    //     }
-    // }
-    sodiumoxide::utils::mlock(arr).map_err(|_|PyErr::new::<pyo3::exceptions::PyTypeError, _>(
-        "mlock failed",
-    ))?;
+    unsafe {
+        if !_mlock(arr.as_mut_ptr(), arr.len()) {
+            return Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+                "mlock failed",
+            ));
+        }
+    }
     Ok(())
 }
 
@@ -107,9 +104,8 @@ fn as_array<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a [u8]> {
 
 /// Calls the platform's underlying `mlock(2)` implementation.
 unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
-    memsec::mlock(ptr, len)
-    // region::lock(ptr, len).is_ok()
-    // libsodium_sys::sodium_mlock(ptr as *mut libc::c_void, len) == 0
+    // memsec::mlock(ptr, len)
+    region::lock(ptr, len).is_ok()
 }
 
 /// Calls the platform's underlying `munlock(2)` implementation.

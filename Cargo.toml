@@ -14,9 +14,6 @@ zeroize_rs = { version = "1.8.1", package = "zeroize"}
 numpy = "0.21"
 memsec = "0.7.0"
 region = "3.0.2"
-sodiumoxide = "0.2.7"
-libsodium-sys = "0.2.7"
-libc = "0.2.155"
 
 [profile.release]
 panic = "abort"
