@@ -107,25 +107,13 @@ class TestStringMethods(unittest.TestCase):
                 address2, size2 = arr2.buffer_info()
                 size2 = length * arr2.itemsize
 
-                print(f"Pointer to the first element: {address}")
-                print(f"Length of the array: {length}")
+                print(f"Pointer to the first element: {address2}")
+                print(f"Length of the array: {size2}")
 
                 print("lock arr")
                 lock_memory(address, size)
                 print("lock arr2")
                 lock_memory(address2, size2)
-
-                if not VirtualLock(ctypes.c_void_p(buffer_address), ctypes.c_size_t(buffer_size)):
-                    raise RuntimeError("Failed to lock memory")
-
-                if not VirtualUnlock(ctypes.c_void_p(buffer_address), ctypes.c_size_t(buffer_size)):
-                    raise RuntimeError("Failed to unlock memory")
-
-                if not VirtualLock(ctypes.c_void_p(buffer_address2), ctypes.c_size_t(buffer_size2)):
-                    raise RuntimeError("Failed to lock memory")
-
-                if not VirtualUnlock(ctypes.c_void_p(buffer_address2), ctypes.c_size_t(buffer_size2)):
-                    raise RuntimeError("Failed to unlock memory")
 
                 zeroize1(arr)
                 zeroize1(arr_np)
