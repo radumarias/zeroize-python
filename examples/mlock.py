@@ -26,7 +26,7 @@ SIZES_MB = [
 
 for size in SIZES_MB:
     print(f"size {size}")
-    array_size = size * 1024 * 1024
+    array_size = int()size * 1024 * 1024)
     array = np.zeros(array_size, dtype=np.uint8)  # Initialize array with zeros
 
     # Lock the memory associated with the array
