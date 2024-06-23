@@ -13,6 +13,29 @@ VirtualUnlock = kernel32.VirtualUnlock
 VirtualUnlock.restype = wintypes.BOOL
 VirtualUnlock.argtypes = [wintypes.LPVOID, ctypes.c_size_t]
 
+GetCurrentProcess = kernel32.GetCurrentProcess
+GetCurrentProcess.restype = wintypes.HANDLE
+
+SetProcessWorkingSetSize = kernel32.SetProcessWorkingSetSize
+SetProcessWorkingSetSize.restype = wintypes.BOOL
+SetProcessWorkingSetSize.argtypes = [wintypes.HANDLE, ctypes.c_size_t, ctypes.c_size_t]
+
+# Get the handle of the current process
+current_process = GetCurrentProcess()
+
+# Set the working set size
+min_size = 256 * 1024  # Minimum working set size (e.g., 256KB)
+max_size = 10 * 1024 * 1024  # Maximum working set size (e.g., 1024KB)
+
+result = SetProcessWorkingSetSize(current_process, min_size, max_size)
+
+if not result:
+    error_code = ctypes.get_last_error()
+    error_message = ctypes.FormatError(error_code)
+    print(f"SetProcessWorkingSetSize failed with error code {error_code}: {error_message}")
+else:
+    print("SetProcessWorkingSetSize succeeded.")
+
 SIZES_MB = [
     0.03125,
     0.0625,
