@@ -34,16 +34,11 @@ for size in SIZES_MB:
     size = array.nbytes
 
     if not VirtualLock(ctypes.c_void_p(addr), ctypes.c_size_t(size)):
-        raise ctypes.WinError(ctypes.get_last_error())
+        error_code = ctypes.get_last_error()
+        error_message = ctypes.FormatError(error_code)
+        print(f"VirtualLock failed with error code {error_code}: {error_message}")
 
-    print("Memory locked successfully.")
-
-    # ... perform operations on the array ...
-
-    # Unlock the memory when done
     if not VirtualUnlock(ctypes.c_void_p(addr), ctypes.c_size_t(size)):
-        raise ctypes.WinError(ctypes.get_last_error())
-
-    print("Memory unlocked successfully.")
-
-
+        error_code = ctypes.get_last_error()
+        error_message = ctypes.FormatError(error_code)
+        print(f"VirtualUnlock failed with error code {error_code}: {error_message}")
