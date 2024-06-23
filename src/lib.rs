@@ -106,10 +106,14 @@ fn as_array<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a [u8]> {
 
 /// Calls the platform's underlying `mlock(2)` implementation.
 unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
-    for page in 0..len / PAGE_SIZE {
-        let len2 = len % (page + 1) * PAGE_SIZE;
-        println!("len2 {len2}");
-        if !memsec::mlock(ptr.add(page * PAGE_SIZE), len2) {
+    if len == 0 {
+        return true;
+    }
+    let page_count = len / PAGE_SIZE + 1;
+    for page in 1..=page_count {
+        let len2 = if page < page_count { PAGE_SIZE } else { len % PAGE_SIZE };
+        println!("page {page} len {len2}");
+        if !memsec::mlock(ptr.add((page - 1) * PAGE_SIZE), len2) {
             return false;
         }
     }
@@ -118,9 +122,13 @@ unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
 
 /// Calls the platform's underlying `munlock(2)` implementation.
 unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
-    for page in 0..len / PAGE_SIZE {
-        let len2 = len % (page + 1) * PAGE_SIZE;
-        if !memsec::munlock(ptr.add(page * PAGE_SIZE), len2) {
+    if len == 0 {
+        return true;
+    }
+    let page_count = len / PAGE_SIZE + 1;
+    for page in 1..=page_count {
+        let len2 = if page < page_count { PAGE_SIZE } else { len % PAGE_SIZE };
+        if !memsec::munlock(ptr.add((page - 1) * PAGE_SIZE), len2) {
             return false;
         }
     }
@@ -141,7 +149,7 @@ mod test {
 
     #[test]
     fn test_mlock() {
-        let sizes_mb = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0];
+        let sizes_mb = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 4.42];
         for size in sizes_mb {
             println!("Check for size {size} MB");
             let mut arr = vec![0; (size * 1024.0 * 1024.0) as usize];
