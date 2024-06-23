@@ -1,4 +1,5 @@
 #![deny(warnings)]
+
 use numpy::{PyArray1, PyArrayMethods};
 use pyo3::buffer::PyBuffer;
 use pyo3::prelude::*;
@@ -108,8 +109,13 @@ unsafe fn _mlock(ptr: *mut u8, len: usize) -> bool {
 
 /// Calls the platform's underlying `munlock(2)` implementation.
 unsafe fn _munlock(ptr: *mut u8, len: usize) -> bool {
-    println!("munlock len {len}");
-    memsec::munlock(ptr, len)
+    let r = memsec::munlock(ptr, len);
+    if r == false && cfg!(target_os = "windows") {
+        // On windows if we munlock 2 times on the same page we get an error.
+        // This can happen if we munlock 2 vars that are in the same page.
+        return true;
+    }
+    r
 }
 
 #[cfg(test)]
