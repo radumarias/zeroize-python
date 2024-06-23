@@ -13,24 +13,36 @@ VirtualUnlock = kernel32.VirtualUnlock
 VirtualUnlock.restype = wintypes.BOOL
 VirtualUnlock.argtypes = [wintypes.LPVOID, ctypes.c_size_t]
 
-# Allocate a 64KB array of unsigned 8-bit integers
-size_kb = 128
-array_size = size_kb * 1024  # 64KB
-array = np.zeros(array_size, dtype=np.uint8)  # Initialize array with zeros
+SIZES_MB = [
+    0.03125,
+    0.0625,
+    0.125,
+    0.25,
+    0.5,
+    1,
+    1.6,
+]
 
-# Lock the memory associated with the array
-addr = array.ctypes.data
-size = array.nbytes
+for size in SIZES_MB:
+    print(f"size {size}"")
+    array_size = size * 1024 * 1024
+    array = np.zeros(array_size, dtype=np.uint8)  # Initialize array with zeros
 
-if not VirtualLock(ctypes.c_void_p(addr), ctypes.c_size_t(size)):
-    raise ctypes.WinError(ctypes.get_last_error())
+    # Lock the memory associated with the array
+    addr = array.ctypes.data
+    size = array.nbytes
 
-print("Memory locked successfully.")
+    if not VirtualLock(ctypes.c_void_p(addr), ctypes.c_size_t(size)):
+        raise ctypes.WinError(ctypes.get_last_error())
 
-# ... perform operations on the array ...
+    print("Memory locked successfully.")
 
-# Unlock the memory when done
-if not VirtualUnlock(ctypes.c_void_p(addr), ctypes.c_size_t(size)):
-    raise ctypes.WinError(ctypes.get_last_error())
+    # ... perform operations on the array ...
 
-print("Memory unlocked successfully.")
+    # Unlock the memory when done
+    if not VirtualUnlock(ctypes.c_void_p(addr), ctypes.c_size_t(size)):
+        raise ctypes.WinError(ctypes.get_last_error())
+
+    print("Memory unlocked successfully.")
+
+
