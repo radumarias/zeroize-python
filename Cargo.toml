@@ -1,7 +1,17 @@
 [package]
 name = "zeroize"
-version = "1.1.1"
+description = "Securely clear secrets from memory. Built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler."
+version = "1.0.1"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["Radu Marias <radumarias@gmail.com>"]
+homepage = "https://radumarias.github.io/zeroize-python"
+repository = "https://github.com/radumarias/zeroize-python"
+readme = "README.md"
+keywords = ["memory", "volatile", "secure", "memset", "zero"]
+categories = ["cryptography", "memory-management", "os", "no-std"]
+documentation = "https://github.com/radumarias/zeroize-python"
+exclude = [".github/"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]

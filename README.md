@@ -14,7 +14,7 @@ It can work with `bytearray` and `numpy array`.
 
 # Caveats of `mlock()`
 
-`mlock` works on pages, so 2 variables could reside in the same page and if you `munlock` one it will `munlock` the whole page and also the memory for the other variable.
+`mlock` works on pages, so two variables could reside in the same page and if you `munlock` one it will `munlock` the whole page and also the memory for the other variable.
  Ideally you could `munlock` all your vars at same time so it would not be affected by the overlap. One strategy could be to expire your vars that store credentials when not used and to reload them again when needed. Like that you could `mlock` when you load them and `munlock` on expire and keep all vars under the same expire policy. Like this all var will be `munlock`ed at the same time.
 
 # Examples
@@ -198,12 +198,14 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 1. Fork the repo
 2. Make the changes in your fork
 3. Add tests for your changes, if applicable
-4. `cargo fmt --all`, you can cnofigure your IDE to do this on save [RustRover](https://www.jetbrains.com/help/rust/rustfmt.html) and [VSCode](https://code.visualstudio.com/docs/languages/rust#_formatting)
-5. `cargo check --all` and fix any errors and warnings
-6. `cargo clippy --all` and fix any errors
-7. `cargo test --all --all-features --release` and fix any issues
-8. `cargo bench --all --all-features --release` and fix any issues
-9. Create a PR back to the main repo
-10. Monitor the checks (GitHub actions runned)
+4. `cargo build --workspace --all-targets --all-features` and fix any issues
+5. `cargo fmt --all`, you can configure your IDE to do this on
+   save [RustRover](https://www.jetbrains.com/help/rust/rustfmt.html)
+   and [VSCode](https://code.visualstudio.com/docs/languages/rust#_formatting)
+6. `cargo check --workspace --all-targets` and fix any errors and warnings
+7. `cargo clippy --all-targets` and fix any errors
+8. `cargo test --all-targets --all-features` and fix any issues
+9. Create a PR
+10. Monitor the checks (GitHub actions run)
 11. Respond to any comments
-12. In the end, ideally, it will be merged to `main`
+12. In the end ideally it will be merged to `main`

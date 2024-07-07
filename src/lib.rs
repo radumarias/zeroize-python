@@ -1,9 +1,26 @@
 #![deny(warnings)]
+#![doc(html_playground_url = "https://play.rust-lang.org")]
+#![deny(clippy::all)]
+#![deny(clippy::correctness)]
+#![deny(clippy::suspicious)]
+#![deny(clippy::complexity)]
+#![deny(clippy::perf)]
+#![deny(clippy::style)]
+#![deny(clippy::pedantic)]
+#![deny(clippy::nursery)]
+#![deny(clippy::cargo)]
+// #![deny(missing_docs)]
+#![allow(clippy::similar_names)]
+#![allow(clippy::too_many_arguments)]
+#![allow(clippy::significant_drop_tightening)]
+#![allow(clippy::redundant_closure)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::redundant_pub_crate)]
 
 use numpy::{PyArray1, PyArrayMethods};
-use pyo3::buffer::PyBuffer;
 use pyo3::prelude::*;
 use pyo3::types::{PyByteArray, PyBytes};
+use pyo3::buffer::PyBuffer;
 use zeroize_rs::Zeroize;
 
 /// A Python module implemented in Rust.
@@ -59,10 +76,10 @@ fn as_array_mut<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a mut [
                     "expected a bytearray, bytes, array.array or numpy.array: {err}"
                 ))
             })?;
-            let ptr = buffer.buf_ptr() as *mut u8;
+            let ptr = buffer.buf_ptr().cast::<u8>();
             let len = buffer
                 .as_slice(py)
-                .ok_or(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+                .ok_or_else(|| PyErr::new::<pyo3::exceptions::PyTypeError, _>(
                     "extracting len failed",
                 ))?
                 .len();
