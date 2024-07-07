@@ -108,7 +108,7 @@ fn as_array<'a>(arr: &'a Bound<PyAny>, py: Python<'a>) -> PyResult<&'a [u8]> {
             let ptr = buffer.buf_ptr() as *const u8;
             let len = buffer
                 .as_slice(py)
-                .ok_or(PyErr::new::<pyo3::exceptions::PyTypeError, _>(
+                .ok_or_else(|| PyErr::new::<pyo3::exceptions::PyTypeError, _>(
                     "extracting len failed",
                 ))?
                 .len();
@@ -148,6 +148,8 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::cast_possible_truncation)]
+    #[allow(clippy::cast_sign_loss)]
     fn test_mlock() {
         let sizes_mb = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 4.42];
         for size in sizes_mb {
