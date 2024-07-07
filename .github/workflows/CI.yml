@@ -104,7 +104,7 @@ jobs:
     - name: Run tests
       run: |
         source .env/bin/activate
-        ./tests.sh
+        ./test.sh
 
   test_py_windows:
     runs-on: windows-latest
