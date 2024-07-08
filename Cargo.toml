@@ -1,7 +1,7 @@
 [package]
 name = "zeroize"
 description = "Securely clear secrets from memory. Built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler."
-version = "1.0.4"
+version = "1.0.5"
 edition = "2021"
 license = "Apache-2.0 OR MIT"
 authors = ["Radu Marias <radumarias@gmail.com>"]
