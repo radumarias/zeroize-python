@@ -1,3 +1,5 @@
+cargo-features = ["profile-rustflags"]
+
 [package]
 name = "zeroize"
 description = "Securely clear secrets from memory. Built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler."
@@ -26,6 +28,10 @@ memsec = "0.7.0"
 
 [profile.release]
 panic = "abort"
+# Treat warnings as errors in release builds
+rustflags = ["-Dwarnings"]
+lto = true
 
 [lints.clippy]
 too_many_arguments = "allow"
+module_name_repetitions = "allow"
