@@ -20,6 +20,8 @@ if __name__ == "__main__":
 
         print("locking memory")
 
+        
+        mlock
         mlock(arr)
         mlock(arr_np)
 

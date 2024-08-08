@@ -20,9 +20,12 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = "0.21.2"
-zeroize_rs = { version = "1.8.1", package = "zeroize"}
+zeroize_rs = { version = "1.8.1", package = "zeroize" }
 numpy = "0.21"
 memsec = "0.7.0"
 
 [profile.release]
 panic = "abort"
+
+[lints.clippy]
+too_many_arguments = "allow"
