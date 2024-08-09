@@ -1,16 +1,19 @@
-def mlock(arr: bytearray) -> None:
+from typing import Union
+import numpy as np
+
+def mlock(arr: Union[bytearray, np.ndarray]) -> None:
     """
-    Locks and prevents data from being overwritten or swapped to disk.
+    Locks and prevents data from being swapped to disk.
     Can lock a maximum of 2662 KB at a time.
 
     Args
-        arr (bytearray): A mutable byte array.
+        arr (bytearray | numpy array): A mutable byte array.
 
     Returns
         None
 
     Raises
-        TypeError: If the provided object is not mutable or does not support the buffer protocol.
+        Err if arr is not of type bytearray or numpy array.
 
     Example
     ```python
@@ -27,48 +30,45 @@ def mlock(arr: bytearray) -> None:
     ```
     """
 
-def munlock(arr: bytearray) -> None:
+def munlock(arr: Union[bytearray, np.ndarray]) -> None:
     """
     Unlocks a mutable array in memory.
-    Used to release the memory lock when the sensitive data is no longer needed.
+    Used to unlock the memory when the sensitive data is no longer needed, or right before releasing it from memory.
 
     Args
-        arr (bytearray): A mutable byte array.
+        arr (bytearray | numpy array): A mutable byte array.
 
     Returns
         None
 
     Raises
-        TypeError: If the provided object is not mutable or does not support the buffer protocol.
+        Err if arr is not of type bytearray or numpy array.
 
     Example
         ```python
         from zeroize import mlock, munlock
 
-        # Create a mutable bytearray
-        data = bytearray(b'hello')
+        data = bytearray(b'hello') # Create a mutable bytearray
 
-        # Lock the memory
-        mlock(data)
+        mlock(data) # Lock the memory
 
-        # Unlock the memory
-        munlock(data)
+        munlock(data) # Unlock the memory
         ```
     """
 
-def zeroize1(arr):
+def zeroize1(arr: Union[bytearray, np.ndarray]) -> None:
     """
-    Wipes a mutable array in memory.
+    Zeroize a bytearray or numpy array in memory.
     Overrides the memory with zeroes and ensures the data is no longer accessible.
 
     Args
-        arr (bytearray): A mutable byte array.
+        arr (bytearray | numpy array): A mutable byte array.
 
     Returns
         None
 
     Raises
-        TypeError: If the provided object is not mutable or does not support the buffer protocol.
+        Err if arr is not of type bytearray or numpy array.
 
     Example
     ```python
