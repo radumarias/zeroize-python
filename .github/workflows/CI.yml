@@ -33,7 +33,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        runner: [ubuntu-latest, macos-latest, windows-latest]
+        runner: [macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
 
@@ -161,8 +161,8 @@ jobs:
         pytest || exit /b
         python examples/lock_and_zeroize.py || exit /b
 
-  build_linux:
-    needs: [test_rust, test_py_linux, test_py_macos, test_py_windows]
+  package_linux:
+    needs: [test_rust_linux, test_rust_macos_windows, test_py_linux, test_py_macos, test_py_windows]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -199,8 +199,8 @@ jobs:
           name: wheels-linux-${{ matrix.platform.target }}
           path: dist
 
-  build_windows:
-    needs: [test_rust, test_py_linux, test_py_macos, test_py_windows]
+  package_windows:
+    needs: [test_rust_linux, test_rust_macos_windows, test_py_linux, test_py_macos, test_py_windows]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -229,8 +229,8 @@ jobs:
           name: wheels-windows-${{ matrix.platform.target }}
           path: dist
 
-  build_macos:
-    needs: [test_rust, test_py_linux, test_py_macos, test_py_windows]
+  package_macos:
+    needs: [test_rust_linux, test_rust_macos_windows, test_py_linux, test_py_macos, test_py_windows]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -258,8 +258,8 @@ jobs:
           name: wheels-macos-${{ matrix.platform.target }}
           path: dist
 
-  build_sdist:
-    needs: [test_rust, test_py_linux, test_py_macos, test_py_windows]
+  package_sdist:
+    needs: [test_rust_linux, test_rust_macos_windows, test_py_linux, test_py_macos, test_py_windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -277,7 +277,7 @@ jobs:
   release:
     name: Create release and publish to PyPI
     if: needs.check_version.outputs.changed == 'true' && github.event_name == 'push'
-    needs: [check_version, build_linux, build_windows, build_macos, build_sdist]
+    needs: [check_version, package_linux, package_windows, package_macos, package_sdist]
     runs-on: ubuntu-latest
     permissions:
       contents: write
