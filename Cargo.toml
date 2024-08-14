@@ -1,4 +1,4 @@
-cargo-features = ["profile-rustflags"]
+# cargo-features = ["profile-rustflags"]
 
 [package]
 name = "zeroize"
@@ -29,7 +29,7 @@ memsec = "0.7.0"
 [profile.release]
 panic = "abort"
 # Treat warnings as errors in release builds
-rustflags = ["-Dwarnings"]
+# rustflags = ["-Dwarnings"]
 lto = true
 
 [lints.clippy]
