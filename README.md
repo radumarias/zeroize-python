@@ -1,7 +1,7 @@
 # zeroize
 
 [![PyPI version](https://badge.fury.io/py/zeroize.svg)](https://badge.fury.io/py/zeroize)
-[![CI](https://github.com/radumarias/zeroize-python/actions/workflows/CI.yml/badge.svg)](https://github.com/radumarias/zeroize-python/actions/workflows/CI.yml)
+[![ci](https://github.com/radumarias/zeroize-python/actions/workflows/ci.yml/badge.svg)](https://github.com/radumarias/zeroize-python/actions/workflows/ci.yml)
 
 Securely clear secrets from memory. Built on stable Rust primitives which guarantee memory is zeroed using an operation will not be 'optimized away' by the compiler.
 
